@@ -6,15 +6,27 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { FacebookSyncButton } from '@/features/pages/components/FacebookSyncButton';
-import { RefreshCw, Trash2, Users, Heart } from 'lucide-react';
+import { RefreshCw, Trash2, Users, Heart, AlertCircle } from 'lucide-react';
 import { deletePage } from '@/features/scheduler/actions';
 import { refreshSinglePageStats } from '@/features/pages/actions';
+import { useSearchParams } from 'next/navigation';
+
+import { useSearchParams } from 'next/navigation';
+import { AlertCircle } from 'lucide-react';
 
 export function PagesContent({ pages }: { pages: any[] }) {
   const { t } = useTranslation();
+  const searchParams = useSearchParams();
+  const error = searchParams.get('error');
 
   return (
     <div className="max-w-7xl mx-auto space-y-8">
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center gap-3 animate-in fade-in slide-in-from-top-4 duration-300">
+          <AlertCircle className="h-5 w-5 flex-shrink-0" />
+          <p className="text-sm font-medium">{error}</p>
+        </div>
+      )}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-neutral-900 dark:text-neutral-50 mb-1">
