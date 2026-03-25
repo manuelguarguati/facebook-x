@@ -11,8 +11,6 @@ import { deletePage } from '@/features/scheduler/actions';
 import { refreshSinglePageStats } from '@/features/pages/actions';
 import { useSearchParams } from 'next/navigation';
 
-import { useSearchParams } from 'next/navigation';
-import { AlertCircle } from 'lucide-react';
 
 export function PagesContent({ pages }: { pages: any[] }) {
   const { t } = useTranslation();
