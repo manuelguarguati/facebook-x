@@ -1,6 +1,6 @@
 'use server';
 
-import { getAIProvider } from '@/services/ai/ai.provider';
+import { generateWithFallback } from '@/services/ai/ai.provider';
 import { ScheduledPostRepository } from '@/repositories/scheduled-post.repository';
 import { revalidatePath } from 'next/cache';
 
@@ -8,8 +8,7 @@ export async function generateAndSchedule(formData: FormData) {
   const topic = formData.get('topic') as string;
   const pageId = formData.get('pageId') as string;
 
-  const ai = getAIProvider();
-  const content = await ai.generateContent({
+  const content = await generateWithFallback({
     topic,
     tone: 'professional'
   });

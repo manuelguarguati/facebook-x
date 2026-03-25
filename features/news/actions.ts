@@ -1,7 +1,7 @@
 'use server';
 
 import { NewsService } from '@/services/news/news.service';
-import { getAIProvider } from '@/services/ai/ai.provider';
+import { generateWithFallback } from '@/services/ai/ai.provider';
 import { AiIdeaRepository } from '@/repositories/ai-idea.repository';
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
@@ -16,8 +16,7 @@ export async function transformNewsToPost(newsTitle: string, newsUrl: string) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('Unauthorized');
 
-  const ai = getAIProvider();
-  const content = await ai.generateContent({ 
+  const content = await generateWithFallback({ 
     topic: `Create an engaging social media post sharing this news: ${newsTitle}. Link: ${newsUrl}`,
     tone: 'informative' 
   });
