@@ -7,16 +7,26 @@ export interface NewsItem {
 
 export class NewsService {
   async fetchTrendingTopics(niche: string): Promise<NewsItem[]> {
-    const response = await fetch(`https://newsapi.org/v2/everything?q=${niche}&sortBy=popularity&apiKey=${process.env.NEWS_API_KEY}`);
-    
-    if (!response.ok) throw new Error('Failed to fetch external news');
-    
-    const data = await response.json();
-    return data.articles.slice(0, 10).map((article: any) => ({
-      title: article.title,
-      url: article.url,
-      source: article.source.name,
-      publishedAt: article.publishedAt
-    }));
+    try {
+      const response = await fetch(`https://newsapi.org/v2/everything?q=${niche || 'technology'}&sortBy=popularity&apiKey=${process.env.NEWS_API_KEY}`);
+      
+      if (!response.ok) {
+        console.error('NewsAPI Error:', response.statusText);
+        return [];
+      }
+      
+      const data = await response.json();
+      if (!data.articles) return [];
+
+      return data.articles.slice(0, 10).map((article: any) => ({
+        title: article.title,
+        url: article.url,
+        source: article.source?.name || 'Unknown',
+        publishedAt: article.publishedAt
+      }));
+    } catch (error) {
+      console.error('Failed to fetch news:', error);
+      return [];
+    }
   }
 }

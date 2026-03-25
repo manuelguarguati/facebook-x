@@ -1,0 +1,95 @@
+"use client";
+
+import { useTranslation } from '@/src/lib/i18n/LanguageContext';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card';
+import { Badge } from '@/components/ui/Badge';
+import { BarChart3, Users, Zap, CalendarClock } from 'lucide-react';
+import { AiGenerator } from '@/features/ai/components/AiGenerator';
+
+interface DashboardContentProps {
+  userEmail: string;
+  recentIdeas: any[];
+}
+
+export function DashboardContent({ userEmail, recentIdeas }: DashboardContentProps) {
+  const { t } = useTranslation();
+
+  const stats = [
+    { title: t('dashboard.stats.posts'), value: "128", icon: Zap, trend: "+12%" },
+    { title: t('dashboard.stats.reach'), value: "45.2K", icon: Users, trend: "+5.4%" },
+    { title: t('dashboard.stats.engagement'), value: "4.8%", icon: BarChart3, trend: "+1.2%" },
+    { title: t('dashboard.stats.scheduled'), value: "12", icon: CalendarClock, trend: t('dashboard.stats.stable') },
+  ];
+
+  return (
+    <div className="mx-auto max-w-7xl space-y-8">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-neutral-900 dark:text-neutral-50">
+            {t('dashboard.welcome')}, {userEmail.split('@')[0] || 'User'}
+          </h1>
+          <p className="mt-1 text-neutral-500 dark:text-neutral-400">
+            {t('dashboard.subtitle')}
+          </p>
+        </div>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {stats.map((stat, i) => (
+          <Card key={i}>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-neutral-500 dark:text-neutral-400">
+                {stat.title}
+              </CardTitle>
+              <stat.icon className="h-4 w-4 text-neutral-400" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold dark:text-neutral-50">{stat.value}</div>
+              <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
+                {stat.trend} {t('dashboard.stats.trend_month')}
+              </p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+        <div className="lg:col-span-2">
+          <Card className="h-full">
+            <CardHeader>
+              <CardTitle>{t('dashboard.recent.title')}</CardTitle>
+              <CardDescription>
+                {t('dashboard.recent.description')}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="px-0">
+              <div className="divide-y divide-neutral-200 dark:divide-neutral-800">
+                {recentIdeas.map(idea => (
+                  <div key={idea.id} className="p-6 transition-colors hover:bg-neutral-50/50 dark:hover:bg-neutral-900/50">
+                    <div className="mb-3 flex items-center justify-between">
+                      <Badge variant="secondary" className="text-blue-600 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400">
+                        {idea.idea}
+                      </Badge>
+                      <span className="text-xs text-neutral-500">{t('dashboard.recent.just_now')}</span>
+                    </div>
+                    <p className="text-sm text-neutral-800 dark:text-neutral-300 line-clamp-2">
+                      {idea.source}
+                    </p>
+                  </div>
+                ))}
+                {!recentIdeas.length && (
+                  <div className="py-12 text-center text-sm text-neutral-500">
+                    {t('dashboard.recent.no_items')}
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+        <div className="lg:col-span-1">
+          <AiGenerator />
+        </div>
+      </div>
+    </div>
+  );
+}

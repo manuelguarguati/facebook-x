@@ -64,6 +64,25 @@ export async function signUpAction(formData: FormData) {
   return redirect('/dashboard');
 }
 
+export async function signInWithFacebookAction() {
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: 'facebook',
+    options: {
+      redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback?next=/dashboard/pages&sync=true`,
+      scopes: 'pages_show_list,pages_read_engagement,pages_manage_posts,public_profile,email',
+    },
+  });
+
+  if (error) {
+    return redirect(`/login?error=${error.message}`);
+  }
+
+  if (data.url) {
+    return redirect(data.url);
+  }
+}
+
 export async function signOutAction() {
   const supabase = await createClient();
   await supabase.auth.signOut();

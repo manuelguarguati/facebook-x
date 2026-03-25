@@ -1,0 +1,110 @@
+{
+  "nav": {
+    "login": "Iniciar Sesión",
+    "register": "Registrar",
+    "features": "Características",
+    "support": "Soporte",
+    "contact": "Contacto",
+    "terms": "Términos"
+  },
+  "hero": {
+    "title_main": "Manuel Asistente IA",
+    "subtitle": "Potenciando tu productividad con inteligencia artificial de vanguardia.",
+    "cta": "REGISTRAR",
+    "tagline": "Asistente IA para Redes Sociales"
+  },
+  "auth": {
+    "login_title": "Bienvenido de nuevo",
+    "login_subtitle": "Introduce tus credenciales para acceder",
+    "register_title": "Crear una cuenta",
+    "register_subtitle": "Crea contenido viral con IA hoy mismo",
+    "email_label": "Correo Electrónico",
+    "password_label": "Contraseña",
+    "name_label": "Nombre Completo",
+    "sign_in_button": "Iniciar Sesión",
+    "create_account_button": "Crear Cuenta",
+    "already_have_account": "¿Ya tienes una cuenta? Inicia Sesión",
+    "dont_have_account": "¿No tienes cuenta? Regístrate"
+  },
+  "dashboard": {
+    "sidebar": {
+      "dashboard": "Tablero",
+      "studio": "Estudio de Contenido",
+      "scheduler": "Programador",
+      "pages": "Páginas de Facebook",
+      "sign_out": "Cerrar Sesión"
+    },
+    "welcome": "Bienvenido de nuevo",
+    "subtitle": "Esto es lo que está pasando con tu presencia social hoy.",
+    "stats": {
+      "posts": "Total de Posts Generados",
+      "reach": "Alcance de Audiencia",
+      "engagement": "Enganche Promedio",
+      "scheduled": "Posts Programados",
+      "trend_month": "desde el mes pasado",
+      "stable": "Estable"
+    },
+    "recent": {
+      "title": "Generaciones de IA Recientes",
+      "description": "Tu contenido más reciente generado por el asistente de IA.",
+      "no_items": "No hay ideas generadas aún. ¡Empieza a crear!",
+      "just_now": "Justo ahora"
+    }
+  },
+  "generator": {
+    "title": "💡 Generador de Contenido IA",
+    "label": "¿De qué trata tu publicación?",
+    "placeholder": "ej., Explica por qué Next.js App Router es el futuro...",
+    "button_idle": "Generar Idea",
+    "button_loading": "Generando Magia...",
+    "result_title": "Resultado Generado:"
+  },
+  "news": {
+    "title": "Noticias en Tendencia",
+    "subtitle": "Encuentra temas virales y deja que la IA escriba el post perfecto.",
+    "no_news": "No se encontraron noticias en tendencia.",
+    "read_source": "Leer Fuente →",
+    "button_idle": "Generar Post de IA",
+    "button_loading": "Sintetizando...",
+    "alert_title": "Idea Generada por IA:\n\n"
+  },
+  "scheduler": {
+    "title": "Programador de Contenido",
+    "subtitle": "Gestiona y programa tus próximos posts de Facebook.",
+    "form_title": "🗓 Programar un Post",
+    "content_label": "Contenido del Post",
+    "content_placeholder": "¿Qué tienes en mente? ...",
+    "page_label": "Página de Facebook Destino",
+    "page_placeholder": "Selecciona una página...",
+    "no_pages_error": "No hay páginas conectadas. Por favor, ve a \"Páginas de Facebook\" para conectar una.",
+    "date_label": "Fecha y Hora",
+    "button_idle": "Programar Post",
+    "button_loading": "Programando...",
+    "success_alert": "¡Post programado con éxito!",
+    "list_empty": "No hay posts programados aún.",
+    "status_scheduled": "PROGRAMADO",
+    "status_posted": "PUBLICADO"
+  },
+  "pages": {
+    "title": "Páginas de Facebook",
+    "subtitle": "Gestiona tus páginas de Facebook conectadas y sus permisos.",
+    "list_title": "Páginas Conectadas",
+    "list_description": "Páginas autorizadas para recibir posts programados.",
+    "no_pages": "No hay páginas conectadas aún.",
+    "active": "Activa",
+    "connect_title": "Conectar Nueva Página",
+    "connect_description": "Introduce los detalles de tu página de Facebook manualmente.",
+    "name_label": "Nombre de la Página",
+    "name_placeholder": "Mi Increíble Página",
+    "id_label": "ID de Página de Facebook",
+    "id_placeholder": "1234567890",
+    "token_label": "Token de Acceso de la Página",
+    "token_placeholder": "EAAB...",
+    "token_help": "Obtén esto desde el portal Meta for Developers o Graph API Explorer.",
+    "button_idle": "Conectar Página",
+    "button_loading": "Conectando...",
+    "success_alert": "¡Página conectada con éxito!",
+    "followers": "Seguidores",
+    "fans": "Fans"
+  }
+}

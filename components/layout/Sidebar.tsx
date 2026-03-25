@@ -5,6 +5,8 @@ import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { LayoutDashboard, Newspaper, Calendar, X, Settings } from 'lucide-react';
 import { signOutAction } from '@/features/auth/actions';
+import { useTranslation } from '@/src/lib/i18n/LanguageContext';
+import { LanguageSwitcher } from '@/src/lib/i18n/LanguageSwitcher';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -13,29 +15,30 @@ interface SidebarProps {
 
 export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
   const pathname = usePathname();
+  const { t } = useTranslation();
 
   const routes = [
     {
       href: "/dashboard",
-      label: "Dashboard",
+      label: t('dashboard.sidebar.dashboard'),
       icon: LayoutDashboard,
       active: pathname === "/dashboard",
     },
     {
       href: "/dashboard/news",
-      label: "Content Studio",
+      label: t('dashboard.sidebar.studio'),
       icon: Newspaper,
       active: pathname?.includes("/dashboard/news"),
     },
     {
       href: "/dashboard/schedule",
-      label: "Scheduler",
+      label: t('dashboard.sidebar.scheduler'),
       icon: Calendar,
       active: pathname?.includes("/dashboard/schedule"),
     },
     {
       href: "/dashboard/pages",
-      label: "Facebook Pages",
+      label: t('dashboard.sidebar.pages'),
       icon: Settings,
       active: pathname?.includes("/dashboard/pages"),
     },
@@ -61,7 +64,7 @@ export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
         {/* Header */}
         <div className="flex items-center justify-between p-6">
           <div>
-            <h2 className="text-2xl font-bold tracking-tighter bg-gradient-to-r from-white to-neutral-400 bg-clip-text text-transparent">TECHUS</h2>
+            <h2 className="text-2xl font-bold tracking-tighter bg-gradient-to-r from-white to-neutral-400 bg-clip-text text-transparent">Manuel Asistente IA</h2>
             <p className="text-xs text-blue-400 uppercase tracking-widest mt-1 font-semibold">AI Assistant</p>
           </div>
           <button 
@@ -92,6 +95,11 @@ export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
           ))}
         </nav>
 
+        {/* Language Selection */}
+        <div className="px-6 py-4">
+           <LanguageSwitcher />
+        </div>
+
         {/* Footer / Logout */}
         <div className="p-4 border-t border-white/5 mt-auto">
           <form action={signOutAction}>
@@ -99,7 +107,7 @@ export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
               type="submit" 
               className="w-full text-left px-4 py-3 text-sm font-medium text-neutral-400 rounded-lg hover:bg-neutral-900 hover:text-red-400 transition-colors"
             >
-              Sign Out
+              {t('dashboard.sidebar.sign_out')}
             </button>
           </form>
         </div>

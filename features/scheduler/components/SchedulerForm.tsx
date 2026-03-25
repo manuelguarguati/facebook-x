@@ -4,12 +4,14 @@ import { useState } from 'react';
 import { schedulePost } from '../actions';
 import { ManagedPage } from '@/repositories/page.repository';
 import { Button } from '@/components/ui/Button';
+import { useTranslation } from '@/src/lib/i18n/LanguageContext';
 
 interface SchedulerFormProps {
   pages: ManagedPage[];
 }
 
 export function SchedulerForm({ pages }: SchedulerFormProps) {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -19,7 +21,7 @@ export function SchedulerForm({ pages }: SchedulerFormProps) {
     try {
       await schedulePost(formData);
       (e.target as HTMLFormElement).reset();
-      alert('Post scheduled successfully!');
+      alert(t('scheduler.success_alert'));
     } catch (error: any) {
       alert(error.message);
     } finally {
@@ -28,28 +30,28 @@ export function SchedulerForm({ pages }: SchedulerFormProps) {
   };
 
   return (
-    <div className="bg-white p-6 rounded-xl shadow-sm border border-neutral-200">
-      <h3 className="text-lg font-semibold text-neutral-900 mb-4">🗓 Schedule a Post</h3>
+    <div className="bg-white dark:bg-neutral-900 p-6 rounded-xl shadow-sm border border-neutral-200 dark:border-white/5">
+      <h3 className="text-lg font-semibold text-neutral-900 dark:text-neutral-50 mb-4">{t('scheduler.form_title')}</h3>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-neutral-700 mb-1">Post Content</label>
+          <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">{t('scheduler.content_label')}</label>
           <textarea 
             name="content" 
             required 
             rows={4}
-            className="w-full border border-neutral-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
-            placeholder="What's on your mind? ..."
+            className="w-full border border-neutral-300 dark:border-white/10 rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white dark:bg-neutral-950 dark:text-white"
+            placeholder={t('scheduler.content_placeholder')}
           />
         </div>
         <div className="grid grid-cols-1 gap-4">
           <div>
-             <label className="block text-sm font-medium text-neutral-700 mb-1">Target Facebook Page</label>
+             <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">{t('scheduler.page_label')}</label>
              <select 
                name="pageId" 
                required 
-               className="w-full border border-neutral-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white font-medium"
+               className="w-full border border-neutral-300 dark:border-white/10 rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white dark:bg-neutral-950 dark:text-white font-medium shadow-none"
              >
-               <option value="">Select a page...</option>
+               <option value="">{t('scheduler.page_placeholder')}</option>
                {pages.map((page) => (
                  <option key={page.id} value={page.id}>
                    {page.page_name} ({page.facebook_page_id})
@@ -58,17 +60,17 @@ export function SchedulerForm({ pages }: SchedulerFormProps) {
              </select>
              {pages.length === 0 && (
                <p className="text-xs text-red-500 mt-1">
-                 No pages connected. Please go to "Facebook Pages" to connect one.
+                 {t('scheduler.no_pages_error')}
                </p>
              )}
           </div>
           <div>
-             <label className="block text-sm font-medium text-neutral-700 mb-1">Date & Time</label>
+             <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">{t('scheduler.date_label')}</label>
              <input 
                type="datetime-local" 
                name="scheduledAt" 
                required 
-               className="w-full border border-neutral-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" 
+               className="w-full border border-neutral-300 dark:border-white/10 rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white dark:bg-neutral-950 dark:text-white" 
              />
           </div>
         </div>
@@ -77,7 +79,7 @@ export function SchedulerForm({ pages }: SchedulerFormProps) {
           disabled={loading || pages.length === 0}
           className="w-full"
         >
-          {loading ? 'Scheduling...' : 'Schedule Post'}
+          {loading ? t('scheduler.button_loading') : t('scheduler.button_idle')}
         </Button>
       </form>
     </div>

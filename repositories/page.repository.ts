@@ -6,6 +6,8 @@ export interface ManagedPage {
   facebook_page_id: string;
   page_name: string;
   access_token: string;
+  followers_count: number;
+  fans_count: number;
   created_at?: string;
 }
 
@@ -38,7 +40,7 @@ export class PageRepository {
       .single();
 
     if (error) return { success: false, error: error.message };
-    return { success: true, data: insertedData };
+    return { success: true, data: insertedData as ManagedPage };
   }
 
   async deletePage(id: string): Promise<void> {

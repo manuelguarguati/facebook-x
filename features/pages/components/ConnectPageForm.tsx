@@ -7,7 +7,10 @@ import { Input } from '@/components/ui/Input';
 import { Label } from '@/components/ui/Label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card';
 
+import { useTranslation } from '@/src/lib/i18n/LanguageContext';
+
 export function ConnectPageForm() {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -17,7 +20,7 @@ export function ConnectPageForm() {
     try {
       await connectPage(formData);
       (e.target as HTMLFormElement).reset();
-      alert('Page connected successfully!');
+      alert(t('pages.success_alert'));
     } catch (error: any) {
       alert(error.message);
     } finally {
@@ -28,30 +31,30 @@ export function ConnectPageForm() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Connect New Page</CardTitle>
+        <CardTitle>{t('pages.connect_title')}</CardTitle>
         <CardDescription>
-          Enter your Facebook Page details manually to start scheduling.
+          {t('pages.connect_description')}
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="pageName">Page Name</Label>
-            <Input id="pageName" name="pageName" placeholder="My Awesome Page" required />
+            <Label htmlFor="pageName">{t('pages.name_label')}</Label>
+            <Input id="pageName" name="pageName" placeholder={t('pages.name_placeholder')} required />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="facebookPageId">Facebook Page ID</Label>
-            <Input id="facebookPageId" name="facebookPageId" placeholder="1234567890" required />
+            <Label htmlFor="facebookPageId">{t('pages.id_label')}</Label>
+            <Input id="facebookPageId" name="facebookPageId" placeholder={t('pages.id_placeholder')} required />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="accessToken">Page Access Token</Label>
-            <Input id="accessToken" name="accessToken" type="password" placeholder="EAAB..." required />
+            <Label htmlFor="accessToken">{t('pages.token_label')}</Label>
+            <Input id="accessToken" name="accessToken" type="password" placeholder={t('pages.token_placeholder')} required />
             <p className="text-xs text-neutral-500">
-              Get this from the Meta for Developers portal or Graph API Explorer.
+              {t('pages.token_help')}
             </p>
           </div>
           <Button type="submit" disabled={loading} className="w-full">
-            {loading ? 'Connecting...' : 'Connect Page'}
+            {loading ? t('pages.button_loading') : t('pages.button_idle')}
           </Button>
         </form>
       </CardContent>
