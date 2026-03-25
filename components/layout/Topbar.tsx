@@ -15,10 +15,10 @@ export function Topbar({ user, onOpenSidebar }: TopbarProps) {
   return (
     <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-white/5 bg-neutral-950/50 px-4 backdrop-blur-xl sm:px-6 lg:px-8">
       <div className="flex items-center gap-4">
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="lg:hidden" 
+        <Button
+          variant="ghost"
+          size="icon"
+          className="lg:hidden"
           onClick={onOpenSidebar}
         >
           <Menu className="h-6 w-6" />
