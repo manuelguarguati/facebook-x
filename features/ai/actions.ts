@@ -6,17 +6,22 @@ import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 
 export async function generateIdea(formData: FormData) {
-  const topic = formData.get('topic') as string;
+  try {
+    const topic = formData.get('topic') as string;
 
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error('Unauthorized');
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: 'Inicia sesión para usar la IA' };
 
-  const content = await generateWithFallback({ topic, tone: 'viral' });
+    const content = await generateWithFallback({ topic, tone: 'viral' });
 
-  const repo = new AiIdeaRepository();
-  await repo.saveIdea(user.id, topic, content); // topic is the 'idea', content is the 'source' (or vice versa? In repo I used saveIdea(userId, idea, source))
+    const repo = new AiIdeaRepository();
+    await repo.saveIdea(user.id, topic, content);
 
-  revalidatePath('/dashboard');
-  return { success: true, content };
+    revalidatePath('/dashboard');
+    return { success: true, content };
+  } catch (error: any) {
+    console.error('AI Generation Error:', error);
+    return { success: false, error: error.message || 'Error al generar contenido' };
+  }
 }

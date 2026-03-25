@@ -10,9 +10,9 @@ export default async function DashboardPage() {
   const { data: { user } } = await supabase.auth.getUser();
 
   return (
-    <DashboardContent 
-      userEmail={user?.email || 'User'} 
-      recentIdeas={recentIdeas} 
+    <DashboardContent
+      userEmail={user?.email || 'User'}
+      recentIdeas={recentIdeas}
     />
   );
 }
