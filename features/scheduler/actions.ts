@@ -39,7 +39,9 @@ export async function connectPage(formData: FormData) {
     user_id: user.id,
     facebook_page_id: facebookPageId,
     page_name: pageName,
-    access_token: accessToken
+    access_token: accessToken,
+    followers_count: 0,
+    fans_count: 0
   });
 
   if (!result.success) {
