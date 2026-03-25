@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { Sidebar } from "./Sidebar";
 import { Topbar } from "./Topbar";
+import { BackgroundGlows } from "@/components/ui/BackgroundGlows";
 
 export function DashboardLayout({ children, user }: { children: React.ReactNode; user: any }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -24,12 +25,14 @@ export function DashboardLayout({ children, user }: { children: React.ReactNode;
   }, [isSidebarOpen]);
 
   return (
-    <div className="flex h-screen w-full bg-neutral-50 dark:bg-neutral-900 overflow-hidden font-sans">
+    <div className="relative flex h-screen w-full bg-neutral-950 overflow-hidden font-sans">
+      <BackgroundGlows />
+      
       <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
       
-      <div className="flex flex-1 flex-col overflow-hidden">
+      <div className="relative z-10 flex flex-1 flex-col overflow-hidden">
         <Topbar user={user} onOpenSidebar={() => setIsSidebarOpen(true)} />
-        <main className="flex-1 overflow-y-auto bg-neutral-50/50 p-4 sm:p-6 lg:p-8 dark:bg-neutral-900">
+        <main className="flex-1 overflow-y-auto bg-transparent p-4 sm:p-6 lg:p-8">
           {children}
         </main>
       </div>

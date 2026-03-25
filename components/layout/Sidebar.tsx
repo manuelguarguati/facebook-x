@@ -54,7 +54,7 @@ export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
       {/* Sidebar container */}
       <aside 
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex w-72 flex-col bg-neutral-950 text-white transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 border-r border-neutral-800",
+          "fixed inset-y-0 left-0 z-50 flex w-72 flex-col bg-neutral-950 text-white transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 border-r border-white/5",
           isOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
@@ -93,7 +93,7 @@ export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
         </nav>
 
         {/* Footer / Logout */}
-        <div className="p-4 border-t border-neutral-900 mt-auto">
+        <div className="p-4 border-t border-white/5 mt-auto">
           <form action={signOutAction}>
             <button 
               type="submit" 

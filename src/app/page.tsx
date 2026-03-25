@@ -1,15 +1,12 @@
 import Link from 'next/link';
 import { LandingCarousel } from '@/components/landing/LandingCarousel';
 import { Button } from '@/components/ui/Button';
+import { BackgroundGlows } from '@/components/ui/BackgroundGlows';
 
 export default function Home() {
   return (
     <main className="min-h-screen bg-neutral-950 text-white overflow-x-hidden font-sans selection:bg-blue-500/30">
-      {/* Background Glows */}
-      <div className="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-6xl h-full pointer-events-none z-0">
-        <div className="absolute top-[-10%] left-[20%] w-[40%] h-[40%] bg-blue-600/10 blur-[120px] rounded-full" />
-        <div className="absolute top-[40%] right-[10%] w-[30%] h-[30%] bg-indigo-600/5 blur-[100px] rounded-full" />
-      </div>
+      <BackgroundGlows />
 
       {/* Header / Nav */}
       <nav className="relative z-10 flex items-center justify-between px-6 py-6 max-w-7xl mx-auto">

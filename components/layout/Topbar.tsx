@@ -13,7 +13,7 @@ export function Topbar({ user, onOpenSidebar }: TopbarProps) {
   const initials = user?.email ? user.email.substring(0, 2).toUpperCase() : "US";
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-neutral-200 bg-white/80 px-4 backdrop-blur-md dark:border-neutral-800 dark:bg-neutral-950/80 sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-white/5 bg-neutral-950/50 px-4 backdrop-blur-xl sm:px-6 lg:px-8">
       <div className="flex items-center gap-4">
         <Button 
           variant="ghost" 
