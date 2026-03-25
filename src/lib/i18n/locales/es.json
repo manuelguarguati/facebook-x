@@ -105,6 +105,8 @@
     "button_loading": "Conectando...",
     "success_alert": "¡Página conectada con éxito!",
     "followers": "Seguidores",
-    "fans": "Fans"
+    "fans": "Fans",
+    "sync_button_idle": "Sincronizar Páginas Facebook",
+    "sync_button_loading": "Conectando..."
   }
 }
