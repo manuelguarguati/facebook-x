@@ -1,33 +1,52 @@
 import { createClient } from '@/lib/supabase/server';
 
+export interface Post {
+  id: string;
+  page_id: string;
+  facebook_post_id: string;
+  message: string;
+  media_url?: string;
+  likes: number;
+  comments: number;
+  shares: number;
+  reach: number;
+  posted_at: string;
+  created_at: string;
+}
+
 export class PostRepository {
-  async scheduleNewPost(post: any): Promise<any> {
+  async getPagePosts(pageId: string, limit: number = 10): Promise<Post[]> {
     const supabase = await createClient();
-    const { data, error } = await supabase.from('posts').insert(post).select().single();
-    if (error) throw new Error(`Database Error: ${error.message}`);
+    const { data, error } = await supabase
+      .from('posts')
+      .select('*')
+      .eq('page_id', pageId)
+      .order('posted_at', { ascending: false })
+      .limit(limit);
+
+    if (error) return [];
+    return data || [];
+  }
+
+  async getPostMetrics(postId: string): Promise<Post | null> {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from('posts')
+      .select('*')
+      .eq('id', postId)
+      .single();
+
+    if (error) return null;
     return data;
   }
 
-  async getDuePosts(): Promise<any[]> {
+  async savePostFromFacebook(postData: Partial<Post>): Promise<{ success: boolean; error?: string }> {
     const supabase = await createClient();
-    const now = new Date().toISOString();
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from('posts')
-      .select('*, pages(access_token, id)')
-      .eq('status', 'scheduled')
-      .lte('scheduled_at', now);
-    if (error) throw new Error(error.message);
-    return data || [];
-  }
-  
-  async updatePostStatus(id: string, status: string, platformId?: string, errorMsg?: string) {
-    const supabase = await createClient();
-    await supabase.from('posts').update({ status, platform_id: platformId, error_msg: errorMsg }).eq('id', id);
-  }
+      .upsert(postData, { onConflict: 'facebook_post_id' });
 
-  async getPostsForOverview(): Promise<any[]> {
-    const supabase = await createClient();
-    const { data } = await supabase.from('posts').select('*').order('created_at', { ascending: false }).limit(10);
-    return data || [];
+    if (error) return { success: false, error: error.message };
+    return { success: true };
   }
 }

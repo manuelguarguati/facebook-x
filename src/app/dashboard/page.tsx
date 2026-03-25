@@ -8,7 +8,7 @@ import { createClient } from '@/lib/supabase/server';
 export default async function DashboardPage() {
   const repo = new AiIdeaRepository();
   const recentIdeas = await repo.getRecentIdeas();
-  
+
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -66,12 +66,12 @@ export default async function DashboardPage() {
                   <div key={idea.id} className="p-6 transition-colors hover:bg-neutral-50/50 dark:hover:bg-neutral-900/50">
                     <div className="mb-3 flex items-center justify-between">
                       <Badge variant="secondary" className="text-blue-600 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400">
-                        {idea.topic}
+                        {idea.idea}
                       </Badge>
                       <span className="text-xs text-neutral-500">Just now</span>
                     </div>
                     <p className="text-sm text-neutral-800 dark:text-neutral-300 line-clamp-2">
-                      {idea.content}
+                      {idea.source}
                     </p>
                   </div>
                 ))}

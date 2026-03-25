@@ -3,8 +3,8 @@ import { createClient } from '@/lib/supabase/server';
 export interface AiIdea {
   id: string;
   user_id: string;
-  topic: string;
-  content: string;
+  idea: string;
+  source: string;
   created_at: string;
 }
 
@@ -26,14 +26,14 @@ export class AiIdeaRepository {
     return data as AiIdea[];
   }
 
-  async saveIdea(userId: string, topic: string, content: string): Promise<{ success: boolean; error?: string }> {
+  async saveIdea(userId: string, idea: string, source: string): Promise<{ success: boolean; error?: string }> {
     const supabase = await createClient();
     const { error } = await supabase
       .from('ai_ideas')
       .insert({
         user_id: userId,
-        topic,
-        content
+        idea,
+        source
       });
 
     if (error) return { success: false, error: error.message };

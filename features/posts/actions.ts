@@ -1,7 +1,7 @@
 'use server';
 
 import { getAIProvider } from '@/services/ai/ai.provider';
-import { PostRepository } from '@/repositories/post.repository';
+import { ScheduledPostRepository } from '@/repositories/scheduled-post.repository';
 import { revalidatePath } from 'next/cache';
 
 export async function generateAndSchedule(formData: FormData) {
@@ -14,12 +14,12 @@ export async function generateAndSchedule(formData: FormData) {
     tone: 'professional'
   });
 
-  const repo = new PostRepository();
+  const repo = new ScheduledPostRepository();
   await repo.scheduleNewPost({
     page_id: pageId,
     content,
-    status: 'scheduled',
-    scheduled_at: new Date(Date.now() + 86400000).toISOString()
+    scheduled_for: new Date(Date.now() + 86400000).toISOString(),
+    ai_generated: true
   });
 
   revalidatePath('/dashboard');

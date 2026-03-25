@@ -16,7 +16,7 @@ export async function generateIdea(formData: FormData) {
   const content = await ai.generateContent({ topic, tone: 'viral' });
 
   const repo = new AiIdeaRepository();
-  await repo.saveIdea(user.id, topic, content);
+  await repo.saveIdea(user.id, topic, content); // topic is the 'idea', content is the 'source' (or vice versa? In repo I used saveIdea(userId, idea, source))
 
   revalidatePath('/dashboard');
   return { success: true, content };
