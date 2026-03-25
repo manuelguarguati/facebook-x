@@ -71,6 +71,8 @@ export async function signInWithFacebookAction() {
   const origin = `${protocol}://${host}`;
   const redirectUrl = `${origin}/auth/callback?next=/dashboard/pages&sync=true`;
 
+  console.log('DEBUG: Facebook OAuth Redirect URL:', redirectUrl);
+
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'facebook',
