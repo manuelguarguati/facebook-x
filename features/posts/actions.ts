@@ -1,3 +1,5 @@
+'use server';
+
 import { getAIProvider } from '@/services/ai/ai.provider';
 import { PostRepository } from '@/repositories/post.repository';
 import { revalidatePath } from 'next/cache';

@@ -4,10 +4,10 @@ import { AuthLayout } from '@/components/layout/AuthLayout';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Label } from '@/components/ui/Label';
-import { signInAction } from '@/features/auth/actions';
+import { signUpAction } from '@/features/auth/actions';
 import Link from 'next/link';
 
-export default async function LoginPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
+export default async function RegisterPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
   const params = await searchParams;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -18,23 +18,22 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
 
   return (
     <AuthLayout 
-      title="Welcome back" 
-      subtitle="Enter your credentials to access your account"
+      title="Create an account" 
+      subtitle="Start generating viral AI content today"
     >
-      <form action={signInAction} className="space-y-6">
+      <form action={signUpAction} className="space-y-6">
         <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="name">Full Name</Label>
+            <Input id="name" name="name" type="text" placeholder="John Doe" required />
+          </div>
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input id="email" name="email" type="email" placeholder="you@example.com" required />
           </div>
           <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="password">Password</Label>
-              <Link href="#" className="text-sm text-blue-600 hover:text-blue-500">
-                Forgot password?
-              </Link>
-            </div>
-            <Input id="password" name="password" type="password" required />
+            <Label htmlFor="password">Password</Label>
+            <Input id="password" name="password" type="password" required minLength={6} placeholder="••••••••" />
           </div>
         </div>
 
@@ -45,13 +44,13 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
         )}
 
         <Button type="submit" className="w-full">
-          Sign In
+          Create Account
         </Button>
         
         <p className="text-center text-sm text-neutral-600 dark:text-neutral-400">
-          Don&apos;t have an account?{' '}
-          <Link href="/register" className="font-medium text-blue-600 hover:text-blue-500">
-            Sign up
+          Already have an account?{' '}
+          <Link href="/login" className="font-medium text-blue-600 hover:text-blue-500">
+            Sign in
           </Link>
         </p>
       </form>

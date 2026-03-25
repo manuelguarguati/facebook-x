@@ -1,0 +1,66 @@
+# TECHUS UI & Architecture Walkthrough
+
+This document outlines the architectural decisions and best practices established for the TECHUS SaaS Platform. We implemented a professional, scalable, and mobile-first architecture utilizing Next.js App Router, TailwindCSS, and reusable UI components.
+
+## Folder Tree Map
+
+```plaintext
+TECHUS/
+├── src/
+│   └── app/                  # Next.js App Router
+│       ├── (auth)/           # Route Group for Authentication
+│       │   ├── login/page.tsx
+│       │   └── register/page.tsx
+│       ├── (dashboard)/      # Route Group for internal application
+│       │   ├── layout.tsx    # Implements the DashboardLayout
+│       │   └── page.tsx      # Responsive dashboard workspace
+│       └── layout.tsx        # Global Root Layout
+├── components/
+│   ├── layout/               # Orchestration components
+│   │   ├── Sidebar.tsx       # Standard sidebar / mobile drawer
+│   │   ├── Topbar.tsx        # Header with user profile
+│   │   ├── DashboardLayout.tsx # Connects Sidebar and Topbar
+│   │   └── AuthLayout.tsx    # Split-screen auth layout
+│   └── ui/                   # Shared Reusable Atomic Components
+│       ├── Button.tsx
+│       ├── Card.tsx
+│       ├── Input.tsx
+│       ├── Label.tsx
+│       ├── Badge.tsx
+│       ├── Spinner.tsx
+│       ├── Modal.tsx
+│       └── LayoutContainer.tsx
+├── features/                 # Modular Domain logic
+│   ├── auth/
+│   │   └── actions.ts        # Server Actions & Supabase interactions
+│   ├── ai/
+│   ├── dashboard/
+│   └── scheduler/
+├── repositories/             # Interface to DB (Clean Architecture)
+└── lib/
+    ├── supabase/             # Supabase clients
+    └── utils.ts              # Global utilities (cn, clsx)
+```
+
+## Architectural Decisions
+
+### 1. Feature-Based Modular Structure
+Instead of dumping all business logic into `src/app/`, we are using `features/`. Every distinct domain of the app (Authentication, AI, Scheduling, News) has its own module. This keeps the codebase highly scalable. If you drop the `scheduler` feature folder, only the scheduling feature goes away.
+
+### 2. The `components/ui` Library Approach
+We created a headless-style UI component system using `tailwind-merge` and `clsx` (`lib/utils.ts cn()`) rather than writing messy inline Tailwind strings everywhere in your pages.
+- **Why?**: It keeps pages like `login.tsx` incredibly readable, standardizes spacing, and ensures brand consistency.
+
+### 3. Server Actions for Authentication
+Registration and Login utilize Next.js Server Actions ([features/auth/actions.ts](file:///c:/Users/manuel/Desktop/proyecto%20x%20facebook/TECHUS/features/auth/actions.ts)). 
+- **The Flow**: Form submission -> [signUpAction](file:///c:/Users/manuel/Desktop/proyecto%20x%20facebook/TECHUS/features/auth/actions.ts#23-57) -> calls `Supabase.auth.signUp` -> on success, **immediately inserts user data into the custom `users` database table** -> Redirects to Dashboard. This guarantees your profile tables stay perfectly synchronized with the Supabase Auth session.
+
+### 4. Responsive Mobile-First Design
+- **Sidebar**: By default on mobile screens (sm, md), the Sidebar hides off-canvas (`-translate-x-full`). It utilizes standard React state inside [DashboardLayout.tsx](file:///c:/Users/manuel/Desktop/proyecto%20x%20facebook/TECHUS/components/layout/DashboardLayout.tsx) to slide in, locking the body scroll beneath it to prevent buggy scrolling un-intentionally.
+- **Grids**: The Dashboard page uses CSS Grid heavily, adapting from 1 column on mobile to 3-4 columns on Desktop `sm:grid-cols-2 lg:grid-cols-4`, giving that fluid SaaS feeling without JavaScript math.
+
+## Best Practices for Long Term Maintenance
+
+1. **NEVER use complex Tailwind strings inline on Pages or Layouts**: If you catch yourself writing `className="flex items-center justify-center p-4 bg-red-500 rounded-lg shadow-sm border..."`, stop and abstract it into a `components/ui` component.
+2. **Keep the App Router dumb**: The files in `src/app/` should primarily just be routing orchestrators. They call Server Actions or Repositories, fetch standard data, and pipe it straight into components. Keep heavy business logic strictly in `features/` and `repositories/`.
+3. **Use the [cn()](file:///c:/Users/manuel/Desktop/proyecto%20x%20facebook/TECHUS/lib/utils.ts#4-10) utility**: Always construct strings with [cn()](file:///c:/Users/manuel/Desktop/proyecto%20x%20facebook/TECHUS/lib/utils.ts#4-10) if integrating conditional classes, this strips conflicts (e.g., passing `px-4` when the component defaults to `p-2` safely overrides correctly).

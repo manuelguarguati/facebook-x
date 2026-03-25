@@ -11,9 +11,9 @@ export class PostScheduler {
     for (const post of pendingPosts) {
       try {
         const platformPostId = await this.fbService.publishPost(
-          post.pageId, 
+          post.page_id, 
           post.content, 
-          post.pageAccessToken
+          post.pages?.access_token
         );
         
         await this.postRepo.updatePostStatus(post.id, 'published', platformPostId);

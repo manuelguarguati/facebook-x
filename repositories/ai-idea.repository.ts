@@ -1,31 +1,42 @@
 import { createClient } from '@/lib/supabase/server';
 
+export interface AiIdea {
+  id: string;
+  user_id: string;
+  topic: string;
+  content: string;
+  created_at: string;
+}
+
 export class AiIdeaRepository {
-  async saveIdea(userId: string, topic: string, generatedContent: string): Promise<any> {
+  async getRecentIdeas(limit: number = 3): Promise<AiIdea[]> {
     const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) return [];
+
     const { data, error } = await supabase
+      .from('ai_ideas')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(limit);
+
+    if (error || !data) return [];
+    return data as AiIdea[];
+  }
+
+  async saveIdea(userId: string, topic: string, content: string): Promise<{ success: boolean; error?: string }> {
+    const supabase = await createClient();
+    const { error } = await supabase
       .from('ai_ideas')
       .insert({
         user_id: userId,
         topic,
-        content: generatedContent,
-      })
-      .select()
-      .single();
-      
-    if (error) throw new Error(`DB Error: ${error.message}`);
-    return data;
-  }
+        content
+      });
 
-  async getRecentIdeas(): Promise<any[]> {
-    const supabase = await createClient();
-    const { data, error } = await supabase
-      .from('ai_ideas')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(10);
-      
-    if (error) throw new Error(error.message);
-    return data || [];
+    if (error) return { success: false, error: error.message };
+    return { success: true };
   }
 }
