@@ -1,5 +1,5 @@
 import { OpenAIService } from './openai.service';
-// import { ClaudeService } from './claude.service';
+import { GeminiService } from './gemini.service';
 
 export interface ContentGenerationParams {
   topic: string;
@@ -12,12 +12,21 @@ export interface AIProvider {
   analyzeMetrics(data: any): Promise<any>;
 }
 
-export const getAIProvider = (): AIProvider => {
-  const provider = process.env.ACTIVE_AI_PROVIDER || 'openai';
-  
-  switch (provider) {
-    case 'openai': return new OpenAIService();
-    // case 'claude': return new ClaudeService();
-    default: return new OpenAIService();
+export async function generateWithFallback(params: ContentGenerationParams): Promise<string> {
+  // 1. Try Gemini first
+  try {
+    const gemini = new GeminiService();
+    return await gemini.generateContent(params);
+  } catch (error) {
+    console.error('Gemini failed, falling back to OpenAI...', error);
+    
+    // 2. Try OpenAI as fallback
+    try {
+      const openai = new OpenAIService();
+      return await openai.generateContent(params);
+    } catch (openaiError) {
+      console.error('OpenAI also failed:', openaiError);
+      throw new Error('Todos los proveedores de IA fallaron.');
+    }
   }
 }

@@ -1,6 +1,6 @@
 'use server';
 
-import { getAIProvider } from '@/services/ai/ai.provider';
+import { generateWithFallback } from '@/services/ai/ai.provider';
 import { AiIdeaRepository } from '@/repositories/ai-idea.repository';
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
@@ -12,8 +12,7 @@ export async function generateIdea(formData: FormData) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('Unauthorized');
 
-  const ai = getAIProvider();
-  const content = await ai.generateContent({ topic, tone: 'viral' });
+  const content = await generateWithFallback({ topic, tone: 'viral' });
 
   const repo = new AiIdeaRepository();
   await repo.saveIdea(user.id, topic, content); // topic is the 'idea', content is the 'source' (or vice versa? In repo I used saveIdea(userId, idea, source))
