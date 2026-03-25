@@ -58,51 +58,51 @@ export function PagesContent({ pages }: { pages: any[] }) {
                         </Badge>
                       </div>
                       <p className="text-xs text-neutral-500 mt-0.5">ID: {page.facebook_page_id}</p>
-                      
+
                       <div className="flex items-center gap-6 mt-4">
                         <div className="flex items-center gap-2">
-                            <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                                <Users className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                            </div>
-                            <div>
-                                <p className="text-[10px] text-neutral-500 uppercase font-bold tracking-wider">{t('pages.followers') || 'Followers'}</p>
-                                <p className="text-sm font-bold text-neutral-900 dark:text-neutral-100">{page.followers_count?.toLocaleString() || 0}</p>
-                            </div>
+                          <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                            <Users className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                          </div>
+                          <div>
+                            <p className="text-[10px] text-neutral-500 uppercase font-bold tracking-wider">{t('pages.followers') || 'Followers'}</p>
+                            <p className="text-sm font-bold text-neutral-900 dark:text-neutral-100">{page.followers_count?.toLocaleString() || 0}</p>
+                          </div>
                         </div>
                         <div className="flex items-center gap-2">
-                            <div className="p-2 bg-pink-50 dark:bg-pink-900/20 rounded-lg">
-                                <Heart className="h-4 w-4 text-pink-600 dark:text-pink-400" />
-                            </div>
-                            <div>
-                                <p className="text-[10px] text-neutral-500 uppercase font-bold tracking-wider">{t('pages.fans') || 'Fans'}</p>
-                                <p className="text-sm font-bold text-neutral-900 dark:text-neutral-100">{page.fans_count?.toLocaleString() || 0}</p>
-                            </div>
+                          <div className="p-2 bg-pink-50 dark:bg-pink-900/20 rounded-lg">
+                            <Heart className="h-4 w-4 text-pink-600 dark:text-pink-400" />
+                          </div>
+                          <div>
+                            <p className="text-[10px] text-neutral-500 uppercase font-bold tracking-wider">{t('pages.fans') || 'Fans'}</p>
+                            <p className="text-sm font-bold text-neutral-900 dark:text-neutral-100">{page.fans_count?.toLocaleString() || 0}</p>
+                          </div>
                         </div>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                        <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            className="text-neutral-500 hover:text-blue-600"
-                            onClick={() => refreshSinglePageStats(page.id, page.facebook_page_id, page.access_token)}
-                        >
-                            <RefreshCw className="h-4 w-4" />
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-neutral-500 hover:text-blue-600"
+                        onClick={() => refreshSinglePageStats(page.id, page.facebook_page_id, page.access_token)}
+                      >
+                        <RefreshCw className="h-4 w-4" />
+                      </Button>
+                      <form action={async () => {
+                        await deletePage(page.id);
+                      }}>
+                        <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Trash2 className="h-4 w-4" />
                         </Button>
-                        <form action={async () => {
-                          await deletePage(page.id);
-                        }}>
-                          <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </form>
+                      </form>
                     </div>
                   </div>
                 ))}
                 {pages.length === 0 && (
                   <div className="py-12 text-center">
                     <div className="inline-flex items-center justify-center p-4 bg-neutral-100 dark:bg-neutral-800 rounded-full mb-4">
-                        <Users className="h-8 w-8 text-neutral-400" />
+                      <Users className="h-8 w-8 text-neutral-400" />
                     </div>
                     <p className="text-sm text-neutral-500 max-w-[200px] mx-auto">
                       {t('pages.no_pages')}
