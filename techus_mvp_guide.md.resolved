@@ -1,0 +1,27 @@
+# TECHUS MVP Developer Guide
+
+I have transformed your `TECHUS` folder into a fully functional Minimum Viable Product containing all the requested SaaS modules using Clean Architecture.
+
+## Implementation Highlights
+1. **Authentication:**
+   - Added `app/(auth)/login/page.tsx` utilizing Supabase Auth UI mapping Server Actions to validate sessions.
+
+2. **Dashboard Overview (`/dashboard`):**
+   - Interactive AI Content Generation ([features/ai/components/AiGenerator.tsx](file:///c:/Users/manuel/Desktop/proyecto%20x%20facebook/TECHUS/features/ai/components/AiGenerator.tsx)).
+   - List of recent AI Ideas fetched from [repositories/ai-idea.repository.ts](file:///c:/Users/manuel/Desktop/proyecto%20x%20facebook/TECHUS/repositories/ai-idea.repository.ts).
+
+3. **News Fetching (`/dashboard/news`):**
+   - Fetches globally trending tech news from an external API ([services/news/news.service.ts](file:///c:/Users/manuel/Desktop/proyecto%20x%20facebook/TECHUS/services/news/news.service.ts)).
+   - One-click "Generate AI Post" button translating the news article into a Viral FB Post format.
+
+4. **Post Scheduler (`/dashboard/schedule`):**
+   - Form to schedule FB Posts at a specific `datetime-local`.
+   - Database representation via [repositories/scheduled-post.repository.ts](file:///c:/Users/manuel/Desktop/proyecto%20x%20facebook/TECHUS/repositories/scheduled-post.repository.ts) ready for a CRON worker to pick up.
+
+## UI Architecture
+- **Tailwindcss** styling focused on SaaS minimalism (white cards, slight borders, shadow-sm, slate text).
+- **Isloated Client Components**: Forms (Scheduler, News, AI Generator) are labeled `'use client'` strictly limiting JS payload while fetching data is done Server Side ensuring supreme performance.
+
+## Next Steps for Future Scaling
+- Integrate `next-auth` or just wire the `FacebookLogin` button in Supabase to acquire the Page Graph Tokens.
+- Setup a Trigger.dev or Vercel Cron worker targeting `/api/cron/process` to poll `scheduled_posts` and fire actions via [facebook.service.ts](file:///c:/Users/manuel/Desktop/proyecto%20x%20facebook/TECHUS/services/facebook/facebook.service.ts).

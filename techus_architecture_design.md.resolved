@@ -1,0 +1,465 @@
+# TECHUS: SaaS Platform Architecture Design
+
+## 1. Architectural Overview
+TECHUS is designed using **Clean Architecture** principles combined with modern **Next.js App Router** conventions. The system is strictly divided into layers to ensure separation of concerns, exceptional testability, and the ability to easily swap underlying infrastructure (such as transitioning from OpenAI to Claude, or changing database providers).
+
+- **UI Layer (`/app`, `/components`)**: Handles layouts, rendering, state, and user interactions. Contains **zero business logic**.
+- **Server Actions / API Layer (`/app/api`, `/features`)**: Acts as the bridge between the UI and the underlying services. 
+- **Service Layer (`/services`)**: Contains the core business rules and third-party integrations (AI generation, social media publishing, task scheduling).
+- **Data Access Layer (`/repositories`)**: Abstracts all database queries (Supabase). Services never interact directly with the DB client.
+
+## 2. Scalable Folder Tree
+```text
+/TECHUS
+├── app/                        # Next.js App Router (UI & API Routes)
+│   ├── (auth)/                 # Authentication flow
+│   │   ├── login/page.tsx
+│   │   └── register/page.tsx
+│   ├── (dashboard)/            # Protected application routes
+│   │   ├── layout.tsx          # Dashboard layout structure
+│   │   └── page.tsx            # Main dashboard route
+│   ├── api/                    # API Routes (Webhooks, Cron Jobs)
+│   │   └── webhooks/facebook/route.ts
+│   ├── layout.tsx              # Root HTML layout
+│   └── page.tsx                # Landing page
+├── components/                 # Reusable UI components
+│   ├── ui/                     # Primitives (Buttons, Inputs - e.g. shadcn/ui)
+│   └── shared/                 # Complex recurring components (Navbar, Sidebar)
+├── features/                   # Feature-based organization
+│   ├── posts/                  
+│   │   ├── actions.ts          # Server actions specific to posts
+│   │   └── components/         # Feature-specific UI components
+│   └── analytics/              
+├── services/                   # Business Logic & Infrastructure
+│   ├── ai/
+│   │   ├── ai.provider.ts      # Abstract Provider Interface
+│   │   ├── openai.service.ts   # OpenAI Implementation
+│   │   ├── claude.service.ts   # Anthropic Claude Implementation
+│   │   └── gemini.service.ts   # Google Gemini Implementation
+│   ├── facebook/
+│   │   └── facebook.service.ts # Facebook Graph API Isolation
+│   ├── news/
+│   │   └── news.service.ts     # External RSS / News API
+│   └── scheduler/
+│       └── post.scheduler.ts   # Background job coordination
+├── repositories/               # Database Communication Layer
+│   ├── user.repository.ts
+│   ├── page.repository.ts
+│   ├── post.repository.ts
+│   └── analytics.repository.ts
+├── lib/                        # Core utilities & framework setups
+│   ├── supabase/               # Supabase SSR clients
+│   │   ├── server.ts
+│   │   └── client.ts
+│   └── utils.ts                # Tailwind merge, formatting, etc.
+├── hooks/                      # Custom React hooks (e.g. useMediaQuery)
+├── types/                      # TypeScript Global types & Zod schemas
+│   ├── index.ts
+│   └── database.types.ts       # Supabase auto-generated types
+├── config/                     # Environment configuration
+│   └── env.ts                  # Zod validation for process.env
+├── .env.example                # Environment variables template
+└── middleware.ts               # Next.js Edge Middleware (Auth routing)
+```
+
+## 3. Environment Variables (`.env.example`)
+Environment variables dictate how the system runs and which third-party providers are active. Validated at startup via Zod in `/config/env.ts`.
+
+```env
+# ==========================================
+# Next.js Application
+# ==========================================
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+
+# ==========================================
+# Supabase (Database + Auth + Storage)
+# ==========================================
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
+
+# ==========================================
+# AI Providers (Swappable implementation)
+# ==========================================
+# Options: openai | gemini | claude
+ACTIVE_AI_PROVIDER=openai 
+OPENAI_API_KEY=your_openai_key
+GEMINI_API_KEY=your_gemini_key
+ANTHROPIC_API_KEY=your_claude_key
+
+# ==========================================
+# External Services
+# ==========================================
+NEWS_API_KEY=your_news_api_key
+
+# ==========================================
+# Facebook Integration
+# ==========================================
+FACEBOOK_APP_ID=your_fb_app_id
+FACEBOOK_APP_SECRET=your_fb_app_secret
+FACEBOOK_WEBHOOK_VERIFY_TOKEN=your_custom_verify_token
+```
+
+## 4. Core System Services
+
+### A. The AI Provider Design Strategy (`/services/ai/`)
+To achieve zero-friction provider swapping, we define an immutable interface and a factory method. Changing the provider only requires updating `ACTIVE_AI_PROVIDER` in `.env`.
+
+**`/services/ai/ai.provider.ts`**
+```typescript
+/**
+ * Abstract interface guaranteeing consistent IO across AI models.
+ */
+export interface ContentGenerationParams {
+  topic: string;
+  tone: 'professional' | 'casual' | 'viral' | 'informative';
+  context?: string;
+}
+
+export interface AIProvider {
+  generateContent(params: ContentGenerationParams): Promise<string>;
+  analyzeMetrics(data: any): Promise<any>;
+}
+
+import { OpenAIService } from './openai.service';
+import { ClaudeService } from './claude.service';
+
+/**
+ * Factory resolving the AI implementation dynamically based on env vars.
+ */
+export const getAIProvider = (): AIProvider => {
+  const provider = process.env.ACTIVE_AI_PROVIDER || 'openai';
+  
+  switch (provider) {
+    case 'openai': return new OpenAIService();
+    case 'claude': return new ClaudeService();
+    // case 'gemini': return new GeminiService();
+    default: return new OpenAIService();
+  }
+}
+```
+
+**`/services/ai/openai.service.ts`**
+```typescript
+import { AIProvider, ContentGenerationParams } from './ai.provider';
+import OpenAI from 'openai';
+
+export class OpenAIService implements AIProvider {
+  private client: OpenAI;
+
+  constructor() {
+    this.client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  }
+
+  async generateContent({ topic, tone, context }: ContentGenerationParams): Promise<string> {
+    const response = await this.client.chat.completions.create({
+      model: 'gpt-4-turbo',
+      messages: [
+        { role: 'system', content: `You are an expert social media AI. Target tone: ${tone}.` },
+        { role: 'user', content: `Write an engaging post about: ${topic}. Context: ${context || 'None'}` }
+      ]
+    });
+    return response.choices[0].message.content || '';
+  }
+
+  async analyzeMetrics(data: any): Promise<any> {
+    // Implementation omitted
+    return {}; 
+  }
+}
+```
+
+### B. News API Integration (`/services/news/news.service.ts`)
+```typescript
+export interface NewsItem {
+  title: string;
+  url: string;
+  source: string;
+  publishedAt: string;
+}
+
+export class NewsService {
+  async fetchTrendingTopics(niche: string): Promise<NewsItem[]> {
+    const response = await fetch(`https://newsapi.org/v2/everything?q=${niche}&sortBy=popularity&apiKey=${process.env.NEWS_API_KEY}`);
+    
+    if (!response.ok) throw new Error('Failed to fetch external news');
+    
+    const data = await response.json();
+    return data.articles.slice(0, 10).map((article: any) => ({
+      title: article.title,
+      url: article.url,
+      source: article.source.name,
+      publishedAt: article.publishedAt
+    }));
+  }
+}
+```
+
+### C. Facebook API Integration (`/services/facebook/facebook.service.ts`)
+```typescript
+export class FacebookService {
+  private readonly baseUrl = 'https://graph.facebook.com/v19.0';
+
+  /**
+   * Securely posts content out to Facebook Graph API
+   */
+  async publishPost(pageId: string, message: string, accessToken: string): Promise<string> {
+    const url = new URL(`${this.baseUrl}/${pageId}/feed`);
+    url.searchParams.append('message', message);
+    url.searchParams.append('access_token', accessToken);
+
+    const response = await fetch(url.toString(), { method: 'POST' });
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(`Facebook API Exception: ${data.error?.message}`);
+    }
+
+    return data.id; // Return the Facebook Post ID
+  }
+}
+```
+
+### D. Multi-Provider Post Scheduler (`/services/scheduler/post.scheduler.ts`)
+```typescript
+import { PostRepository } from '@/repositories/post.repository';
+import { FacebookService } from '@/services/facebook/facebook.service';
+
+/**
+ * Coordination layer orchestrating Repositories and External Services.
+ * Triggered by Next.js API route via external CRON.
+ */
+export class PostScheduler {
+  private postRepo = new PostRepository();
+  private fbService = new FacebookService();
+
+  async processQueue(): Promise<void> {
+    // 1. Ask repository for work
+    const pendingPosts = await this.postRepo.getDuePosts();
+
+    for (const post of pendingPosts) {
+      try {
+        // 2. Transact with external service
+        const platformPostId = await this.fbService.publishPost(
+          post.pageId, 
+          post.content, 
+          post.pageAccessToken
+        );
+        
+        // 3. Mark success
+        await this.postRepo.updatePostStatus(post.id, 'published', platformPostId);
+      } catch (error) {
+        // 4. Handle logical failure and scheduling retry
+        await this.postRepo.updatePostStatus(post.id, 'failed', undefined, String(error));
+      }
+    }
+  }
+}
+```
+
+## 5. Data Access / Repository Pattern
+Abstracting Supabase ensures that Server Actions never write `supabase.from('...')` logic.
+
+**`/repositories/post.repository.ts`**
+```typescript
+import { createClient } from '@/lib/supabase/server';
+import { Database } from '@/types/database.types';
+
+type InsertPost = Database['public']['Tables']['posts']['Insert'];
+type PostRow = Database['public']['Tables']['posts']['Row'];
+
+export class PostRepository {
+  /**
+   * Persists a newly AI-generated post.
+   */
+  async scheduleNewPost(post: InsertPost): Promise<PostRow> {
+    const supabase = createClient();
+    const { data, error } = await supabase
+      .from('posts')
+      .insert(post)
+      .select()
+      .single();
+
+    if (error) throw new Error(`Database Error: ${error.message}`);
+    return data;
+  }
+
+  /**
+   * Bypasses Row Level Security (requires Service Role) to fetch CRON jobs
+   */
+  async getDuePosts(): Promise<any[]> {
+    const supabase = createClient(); // Service role client configured securely
+    const now = new Date().toISOString();
+    
+    const { data, error } = await supabase
+      .from('posts')
+      .select('*, pages(access_token, id)')
+      .eq('status', 'scheduled')
+      .lte('scheduled_at', now);
+      
+    if (error) throw new Error(error.message);
+    return data || [];
+  }
+  
+  async updatePostStatus(id: string, status: string, platformId?: string, errorMsg?: string) {
+      // implementation...
+  }
+}
+```
+
+## 6. Next.js App Router (UI & Actions layer)
+
+### Example Server Action (`/features/posts/actions.ts`)
+```typescript
+'use server'
+
+import { getAIProvider } from '@/services/ai/ai.provider';
+import { PostRepository } from '@/repositories/post.repository';
+import { revalidatePath } from 'next/cache';
+
+/**
+ * Invoked directly from client components. Zero DB leakage.
+ */
+export async function generateAndSchedule(formData: FormData) {
+  const topic = formData.get('topic') as string;
+  const pageId = formData.get('pageId') as string;
+
+  // Utilize the Service Layer
+  const ai = getAIProvider();
+  const content = await ai.generateContent({
+    topic,
+    tone: 'professional'
+  });
+
+  // Utilize the Data Layer
+  const repo = new PostRepository();
+  await repo.scheduleNewPost({
+    page_id: pageId,
+    content,
+    status: 'scheduled',
+    scheduled_at: new Date(Date.now() + 86400000).toISOString() // Scheduled 24h from now
+  });
+
+  // Revalidate cache to sync UI
+  revalidatePath('/dashboard/posts');
+  return { success: true };
+}
+```
+
+### Example Scheduler API Route (`/app/api/cron/process/route.ts`)
+```typescript
+import { NextResponse } from 'next/server';
+import { PostScheduler } from '@/services/scheduler/post.scheduler';
+
+// Secured via Vercel CRON_SECRET mapping
+export async function GET(request: Request) {
+  const authHeader = request.headers.get('authorization');
+  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    return new Response('Unauthorized Access', { status: 401 });
+  }
+
+  const scheduler = new PostScheduler();
+  await scheduler.processQueue();
+
+  return NextResponse.json({ processed: true, timestamp: Date.now() });
+}
+```
+
+### Dashboard Layout & App Routing (`/app/(dashboard)/layout.tsx`)
+```tsx
+import { Sidebar } from '@/components/shared/Sidebar';
+import { Navbar } from '@/components/shared/Navbar';
+import { createClient } from '@/lib/supabase/server';
+import { redirect } from 'next/navigation';
+
+export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
+  // Server Validation Layer
+  const supabase = createClient();
+  const { data: { user }, error } = await supabase.auth.getUser();
+
+  if (error || !user) {
+    redirect('/login');
+  }
+
+  // Pure UI Layout
+  return (
+    <div className="flex h-screen bg-neutral-50 dark:bg-neutral-900">
+      <Sidebar />
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <Navbar user={user} />
+        <main className="flex-1 overflow-y-auto p-8">
+          {children}
+        </main>
+      </div>
+    </div>
+  );
+}
+```
+
+### Example Feature Component & Page (`/app/(dashboard)/page.tsx`)
+```tsx
+import { PostRepository } from '@/repositories/post.repository';
+import { CreatePostForm } from '@/features/posts/components/CreatePostForm';
+import { PostFeed } from '@/features/posts/components/PostFeed';
+
+export default async function InsightsDashboard() {
+  const repo = new PostRepository();
+  const upcomingPosts = await repo.getPostsForOverview(); // Fetched seamlessly
+
+  return (
+    <div className="max-w-7xl mx-auto space-y-8">
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">TECHUS Command Center</h1>
+        <p className="text-neutral-500">Analytics, schedules, and AI deployments.</p>
+      </div>
+      
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2">
+          {/* Component abstracts rendering logic */}
+          <PostFeed initialData={upcomingPosts} /> 
+        </div>
+        <div>
+          {/* Captures intent triggers Server Action */}
+          <CreatePostForm /> 
+        </div>
+      </div>
+    </div>
+  );
+}
+```
+
+## 7. Configuration Strategy: Supabase Setup
+**`/lib/supabase/server.ts`**
+```typescript
+import { createServerClient, type CookieOptions } from '@supabase/ssr'
+import { cookies } from 'next/headers'
+import { Database } from '@/types/database.types'
+
+// Setup based on Supabase SSR documentation mapping Next.js cookies to DB Sessions
+export const createClient = () => {
+  const cookieStore = cookies()
+
+  return createServerClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) { return cookieStore.get(name)?.value },
+        set(name: string, value: string, options: CookieOptions) {
+          try { cookieStore.set({ name, value, ...options }) } catch (error) {}
+        },
+        remove(name: string, options: CookieOptions) {
+          try { cookieStore.set({ name, value: '', ...options }) } catch (error) {}
+        },
+      },
+    }
+  )
+}
+```
+
+## 8. Senior Architect Scaling Remarks
+
+1. **Job Queues vs API Boundaries**: While triggering `PostScheduler` via Next.js route works well initially, as throughput reaches 1,000+ posts/day, Vercel edge/serverless compute timeouts will fail. Move queue orchestration to **Inngest**, **BullMQ (with Redis)**, or **Trigger.dev**. Next.js Actions should purely dispatch queue messages, leaving actual Facebook APIs handling for background workers.
+2. **Tenant Isolation**: Implementing *RLS (Row Level Security)* on Supabase is mission critical. Every `posts`, `pages`, and `analytics` table must contain a `user_id` or `workspace_id`. Policies must enforce isolation so tenants securely access only their respective token footprints.
+3. **Database Caching**: Avoid hammering Supabase connections dynamically per request. Implement bounded caching across NextJS `unstable_cache` or use an external Redis store mapping frequent lookups (like User Settings).
+4. **Resiliency & Webhooks**: Implement dead-letter queues on webhook failures. When the Facebook integration encounters token expiries, your app must capture the API error code (e.g., Code 190) and instantly push an App notification or send a transactional email prompting re-authentication instead of failing silently in the background.
