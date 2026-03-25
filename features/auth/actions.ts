@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
+import { headers } from 'next/headers';
 
 export async function signInAction(formData: FormData) {
   const email = formData.get('email') as string;
@@ -65,11 +66,16 @@ export async function signUpAction(formData: FormData) {
 }
 
 export async function signInWithFacebookAction() {
+  const host = (await headers()).get('host');
+  const protocol = host?.includes('localhost') ? 'http' : 'https';
+  const origin = `${protocol}://${host}`;
+  const redirectUrl = `${origin}/auth/callback?next=/dashboard/pages&sync=true`;
+
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'facebook',
     options: {
-      redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback?next=/dashboard/pages&sync=true`,
+      redirectTo: redirectUrl,
       scopes: 'pages_show_list,pages_read_engagement,pages_manage_posts,public_profile,email',
     },
   });

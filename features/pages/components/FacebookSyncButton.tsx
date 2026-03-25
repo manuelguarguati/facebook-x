@@ -9,12 +9,9 @@ export function FacebookSyncButton() {
 
   const handleSync = async () => {
     setLoading(true);
-    try {
-      await signInWithFacebookAction();
-    } catch (error: any) {
-      alert(error.message);
-      setLoading(false);
-    }
+    // Note: signInWithFacebookAction triggers a redirect, 
+    // which throws an internal error that shouldn't be caught and alerted.
+    await signInWithFacebookAction();
   };
 
   return (
