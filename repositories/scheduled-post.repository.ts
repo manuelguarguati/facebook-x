@@ -9,6 +9,12 @@ export interface ScheduledPost {
   status: 'pending' | 'published' | 'failed';
   ai_generated: boolean;
   created_at: string;
+  facebook_post_id?: string;
+  error_message?: string;
+  pages?: {
+    facebook_page_id: string;
+    access_token?: string;
+  };
 }
 
 export class ScheduledPostRepository {
@@ -56,5 +62,52 @@ export class ScheduledPostRepository {
 
     if (error) return { success: false, error: error.message };
     return { success: true, data: insertedData };
+  }
+
+  async getUserScheduledPosts(userId: string): Promise<ScheduledPost[]> {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from('scheduled_posts')
+      .select(`
+        *,
+        pages!inner (
+          user_id
+        )
+      `)
+      .eq('pages.user_id', userId)
+      .order('scheduled_for', { ascending: true });
+
+    if (error) return [];
+    return data || [];
+  }
+
+  async getDuePosts(): Promise<ScheduledPost[]> {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from('scheduled_posts')
+      .select(`
+        *,
+        pages (
+          facebook_page_id,
+          access_token
+        )
+      `)
+      .eq('status', 'pending')
+      .lte('scheduled_for', new Date().toISOString());
+
+    if (error) return [];
+    return data || [];
+  }
+
+  async updatePostStatus(id: string, status: string, facebookPostId?: string, errorMessage?: string): Promise<void> {
+    const supabase = await createClient();
+    await supabase
+      .from('scheduled_posts')
+      .update({ 
+        status, 
+        facebook_post_id: facebookPostId, 
+        error_message: errorMessage 
+      })
+      .eq('id', id);
   }
 }

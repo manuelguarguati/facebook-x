@@ -14,7 +14,11 @@ export async function schedulePost(formData: FormData) {
   if (!user) throw new Error('Unauthorized');
 
   const repo = new ScheduledPostRepository();
-  await repo.scheduleNewPost(user.id, content, platformId, new Date(scheduledAt).toISOString());
+  await repo.scheduleNewPost({
+    page_id: platformId,
+    content,
+    scheduled_for: new Date(scheduledAt).toISOString()
+  });
 
   revalidatePath('/dashboard/schedule');
   return { success: true };

@@ -1,8 +1,8 @@
-import { PostRepository } from '@/repositories/post.repository';
+import { ScheduledPostRepository } from '@/repositories/scheduled-post.repository';
 import { FacebookService } from '@/services/facebook/facebook.service';
 
 export class PostScheduler {
-  private postRepo = new PostRepository();
+  private postRepo = new ScheduledPostRepository();
   private fbService = new FacebookService();
 
   async processQueue(): Promise<void> {
@@ -10,10 +10,14 @@ export class PostScheduler {
 
     for (const post of pendingPosts) {
       try {
+        if (!post.pages?.facebook_page_id || !post.pages?.access_token) {
+          throw new Error('Missing page configuration or access token');
+        }
+
         const platformPostId = await this.fbService.publishPost(
-          post.page_id, 
+          post.pages.facebook_page_id, 
           post.content, 
-          post.pages?.access_token
+          post.pages.access_token
         );
         
         await this.postRepo.updatePostStatus(post.id, 'published', platformPostId);
