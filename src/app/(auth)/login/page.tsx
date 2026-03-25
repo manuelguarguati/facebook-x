@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/Label';
 import { signInAction } from '@/features/auth/actions';
 import Link from 'next/link';
 
-export default async function LoginPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
+export default async function LoginPage({ searchParams }: { searchParams: Promise<{ error?: string; message?: string }> }) {
   const params = await searchParams;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -41,6 +41,12 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
         {params.error && (
           <div className="rounded-md bg-red-50 p-3 text-sm text-red-600 dark:bg-red-900/30 dark:text-red-400">
             {params.error}
+          </div>
+        )}
+
+        {params.message && (
+          <div className="rounded-md bg-blue-50 p-3 text-sm text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
+            {params.message}
           </div>
         )}
 

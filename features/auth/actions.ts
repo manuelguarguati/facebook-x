@@ -33,8 +33,12 @@ export async function signUpAction(formData: FormData) {
     password,
   });
 
-  if (authError || !authData.user) {
-    return redirect(`/register?error=${authError?.message || 'Registration failed'}`);
+  if (authError) {
+    return redirect(`/register?error=${authError.message}`);
+  }
+
+  if (!authData.user) {
+    return redirect('/register?error=Registration failed');
   }
 
   // 2. Insert into custom "users" table
@@ -50,8 +54,18 @@ export async function signUpAction(formData: FormData) {
 
   if (dbError) {
     console.error("Failed to create user profile:", dbError);
-    // Even if profile fails, auth succeeded. We might want to handle this gracefully.
+  }
+
+  // 3. Handle session (if email confirmation is on, session will be null)
+  if (!authData.session) {
+    return redirect('/login?message=Check your email to confirm your account');
   }
 
   return redirect('/dashboard');
+}
+
+export async function signOutAction() {
+  const supabase = await createClient();
+  await supabase.auth.signOut();
+  return redirect('/');
 }

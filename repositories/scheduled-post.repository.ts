@@ -50,7 +50,7 @@ export class ScheduledPostRepository {
     ai_generated?: boolean;
   }): Promise<{ success: boolean; error?: string; data?: ScheduledPost }> {
     const supabase = await createClient();
-    
+
     const { data: insertedData, error } = await supabase
       .from('scheduled_posts')
       .insert({
@@ -103,10 +103,10 @@ export class ScheduledPostRepository {
     const supabase = await createClient();
     await supabase
       .from('scheduled_posts')
-      .update({ 
-        status, 
-        facebook_post_id: facebookPostId, 
-        error_message: errorMessage 
+      .update({
+        status,
+        facebook_post_id: facebookPostId,
+        error_message: errorMessage
       })
       .eq('id', id);
   }

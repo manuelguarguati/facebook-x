@@ -15,4 +15,19 @@ export class FacebookService {
 
     return data.id;
   }
+
+  async getPageInfo(pageId: string, accessToken: string): Promise<{ name: string; id: string }> {
+    const url = new URL(`${this.baseUrl}/${pageId}`);
+    url.searchParams.append('fields', 'name,id');
+    url.searchParams.append('access_token', accessToken);
+
+    const response = await fetch(url.toString());
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(`Facebook API Exception: ${data.error?.message}`);
+    }
+
+    return { name: data.name, id: data.id };
+  }
 }

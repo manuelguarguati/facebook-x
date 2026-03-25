@@ -2,8 +2,14 @@
 
 import { useState } from 'react';
 import { schedulePost } from '../actions';
+import { ManagedPage } from '@/repositories/page.repository';
+import { Button } from '@/components/ui/Button';
 
-export function SchedulerForm() {
+interface SchedulerFormProps {
+  pages: ManagedPage[];
+}
+
+export function SchedulerForm({ pages }: SchedulerFormProps) {
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -13,6 +19,7 @@ export function SchedulerForm() {
     try {
       await schedulePost(formData);
       (e.target as HTMLFormElement).reset();
+      alert('Post scheduled successfully!');
     } catch (error: any) {
       alert(error.message);
     } finally {
@@ -34,10 +41,26 @@ export function SchedulerForm() {
             placeholder="What's on your mind? ..."
           />
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4">
           <div>
-             <label className="block text-sm font-medium text-neutral-700 mb-1">Facebook Page ID</label>
-             <input type="text" name="platformId" required className="w-full border border-neutral-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Page ID" />
+             <label className="block text-sm font-medium text-neutral-700 mb-1">Target Facebook Page</label>
+             <select 
+               name="pageId" 
+               required 
+               className="w-full border border-neutral-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white font-medium"
+             >
+               <option value="">Select a page...</option>
+               {pages.map((page) => (
+                 <option key={page.id} value={page.id}>
+                   {page.page_name} ({page.facebook_page_id})
+                 </option>
+               ))}
+             </select>
+             {pages.length === 0 && (
+               <p className="text-xs text-red-500 mt-1">
+                 No pages connected. Please go to "Facebook Pages" to connect one.
+               </p>
+             )}
           </div>
           <div>
              <label className="block text-sm font-medium text-neutral-700 mb-1">Date & Time</label>
@@ -49,13 +72,13 @@ export function SchedulerForm() {
              />
           </div>
         </div>
-        <button 
+        <Button 
           type="submit" 
-          disabled={loading}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg transition-colors disabled:opacity-50"
+          disabled={loading || pages.length === 0}
+          className="w-full"
         >
           {loading ? 'Scheduling...' : 'Schedule Post'}
-        </button>
+        </Button>
       </form>
     </div>
   );

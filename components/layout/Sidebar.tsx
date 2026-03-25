@@ -3,7 +3,8 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { LayoutDashboard, Newspaper, Calendar, X } from 'lucide-react';
+import { LayoutDashboard, Newspaper, Calendar, X, Settings } from 'lucide-react';
+import { signOutAction } from '@/features/auth/actions';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -31,6 +32,12 @@ export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
       label: "Scheduler",
       icon: Calendar,
       active: pathname?.includes("/dashboard/schedule"),
+    },
+    {
+      href: "/dashboard/pages",
+      label: "Facebook Pages",
+      icon: Settings,
+      active: pathname?.includes("/dashboard/pages"),
     },
   ];
 
@@ -87,7 +94,7 @@ export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
 
         {/* Footer / Logout */}
         <div className="p-4 border-t border-neutral-900 mt-auto">
-          <form action="/api/auth/signout" method="post">
+          <form action={signOutAction}>
             <button 
               type="submit" 
               className="w-full text-left px-4 py-3 text-sm font-medium text-neutral-400 rounded-lg hover:bg-neutral-900 hover:text-red-400 transition-colors"

@@ -4,7 +4,7 @@ import { type NextRequest, NextResponse } from "next/server";
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY;
 
-const PUBLIC_ROUTES = ["/login", "/register"];
+const PUBLIC_ROUTES = ["/", "/login", "/register"];
 
 export const updateSession = async (request: NextRequest) => {
   const { pathname } = request.nextUrl;
@@ -45,7 +45,7 @@ export const updateSession = async (request: NextRequest) => {
   } = await supabase.auth.getUser();
 
   const isPublicRoute = PUBLIC_ROUTES.some((route) =>
-    pathname.startsWith(route)
+    route === "/" ? pathname === "/" : pathname.startsWith(route)
   );
 
   // Not authenticated and trying to access a protected route → redirect to /login
