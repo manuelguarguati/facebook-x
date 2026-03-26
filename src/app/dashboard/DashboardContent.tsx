@@ -24,29 +24,29 @@ export function DashboardContent({ userEmail, recentIdeas }: DashboardContentPro
 
   return (
     <div className="mx-auto max-w-7xl space-y-8">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+      <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-neutral-900 dark:text-neutral-50">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-900 dark:text-neutral-50 text-balance">
             {t('dashboard.welcome')}, {userEmail.split('@')[0] || 'User'}
           </h1>
-          <p className="mt-1 text-neutral-500 dark:text-neutral-400">
+          <p className="mt-1 text-sm sm:text-base text-neutral-500 dark:text-neutral-400">
             {t('dashboard.subtitle')}
           </p>
         </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat, i) => (
-          <Card key={i}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-neutral-500 dark:text-neutral-400">
+          <Card key={i} className="p-0">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-4 px-4">
+              <CardTitle className="text-xs font-medium text-neutral-500 dark:text-neutral-400">
                 {stat.title}
               </CardTitle>
               <stat.icon className="h-4 w-4 text-neutral-400" />
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold dark:text-neutral-50">{stat.value}</div>
-              <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
+            <CardContent className="px-4 pb-4">
+              <div className="text-xl sm:text-2xl font-bold dark:text-neutral-50">{stat.value}</div>
+              <p className="text-[10px] text-neutral-500 dark:text-neutral-400 mt-0.5">
                 {stat.trend} {t('dashboard.stats.trend_month')}
               </p>
             </CardContent>
@@ -54,10 +54,10 @@ export function DashboardContent({ userEmail, recentIdeas }: DashboardContentPro
         ))}
       </div>
 
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2">
           <Card className="h-full">
-            <CardHeader>
+            <CardHeader className="px-4 sm:px-6">
               <CardTitle>{t('dashboard.recent.title')}</CardTitle>
               <CardDescription>
                 {t('dashboard.recent.description')}

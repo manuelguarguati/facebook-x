@@ -60,29 +60,28 @@ export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
         />
       )}
       
-      {/* Sidebar container */}
       <aside 
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex w-72 flex-col bg-neutral-950 text-white transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 border-r border-white/5",
+          "fixed inset-y-0 left-0 z-50 flex w-64 flex-col bg-neutral-950 text-white transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 border-r border-white/5",
           isOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-6">
+        <div className="flex items-center justify-between p-4 sm:p-6 pb-2">
           <div>
-            <h2 className="text-2xl font-bold tracking-tighter bg-gradient-to-r from-white to-neutral-400 bg-clip-text text-transparent">Manuel Asistente IA</h2>
-            <p className="text-xs text-blue-400 uppercase tracking-widest mt-1 font-semibold">AI Assistant</p>
+            <h2 className="text-xl sm:text-2xl font-bold tracking-tighter bg-gradient-to-r from-white to-neutral-400 bg-clip-text text-transparent">Manuel Asistente IA</h2>
+            <p className="text-[10px] text-blue-400 uppercase tracking-widest mt-1 font-semibold">AI Assistant</p>
           </div>
           <button 
-            className="lg:hidden text-neutral-400 hover:text-white"
+            className="lg:hidden text-neutral-400 hover:text-white p-2"
             onClick={() => setIsOpen(false)}
           >
-            <X className="h-6 w-6" />
+            <X className="h-5 w-5" />
           </button>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 space-y-2 px-4 mt-6">
+        <nav className="flex-1 space-y-1 px-3 mt-4 sm:mt-6">
           {routes.map((route) => (
             <Link
               key={route.href}

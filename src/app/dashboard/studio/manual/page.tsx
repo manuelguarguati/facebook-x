@@ -52,27 +52,27 @@ export default function ManualStudioPage() {
   return (
     <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in duration-500">
       <header>
-        <h1 className="text-3xl font-bold text-white mb-2 flex items-center gap-2">
-          <PenTool className="text-blue-500" /> Estudio Manual
+        <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2 flex items-center gap-2">
+          <PenTool className="text-blue-500 h-6 w-6 sm:h-8 sm:w-8" /> Estudio Manual
         </h1>
-        <p className="text-neutral-400">
+        <p className="text-sm sm:text-base text-neutral-400">
           Crea publicaciones manualmente y prográmalas en tus páginas.
         </p>
       </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="md:col-span-1 space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-1 space-y-6">
           <Card className="bg-neutral-950 border-white/5">
-            <CardHeader className="pb-3 text-white">
+            <CardHeader className="p-4 sm:p-6 pb-3 text-white">
               <CardTitle className="text-sm">Configuración</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="p-4 sm:p-6 pt-0 space-y-4">
               <div>
-                <label className="text-xs text-neutral-500 font-medium block mb-2 uppercase">Publicar en</label>
+                <label className="text-[10px] text-neutral-500 font-medium block mb-2 uppercase">Publicar en</label>
                 <select 
                   value={selectedPageId}
                   onChange={(e) => setSelectedPageId(e.target.value)}
-                  className="w-full bg-neutral-900 border border-white/10 rounded-xl p-2.5 text-sm text-white outline-none focus:border-blue-500 transition-all"
+                  className="w-full bg-neutral-900 border border-white/10 rounded-xl p-2.5 text-xs sm:text-sm text-white outline-none focus:border-blue-500 transition-all font-medium"
                   disabled={pages.length === 0}
                 >
                   {pages.length === 0 ? (
@@ -91,27 +91,27 @@ export default function ManualStudioPage() {
           </Card>
         </div>
 
-        <div className="md:col-span-2">
-          <Card className="bg-neutral-950 border-white/5 h-full flex flex-col">
-            <CardHeader className="border-b border-white/5 pb-4 text-white">
-              <CardTitle className="text-lg">Redacta tu Contenido</CardTitle>
-              <CardDescription className="text-neutral-500">Escribe exactamente lo que quieres publicar.</CardDescription>
+        <div className="lg:col-span-2">
+          <Card className="bg-neutral-950 border-white/5 h-full flex flex-col overflow-hidden">
+            <CardHeader className="border-b border-white/5 p-4 sm:p-6 pb-4 text-white">
+              <CardTitle className="text-base sm:text-lg">Redacta tu Contenido</CardTitle>
+              <CardDescription className="text-xs sm:text-sm text-neutral-500">Escribe exactamente lo que quieres publicar.</CardDescription>
             </CardHeader>
-            <CardContent className="flex-1 p-0 flex flex-col min-h-[400px]">
+            <CardContent className="flex-1 p-0 flex flex-col min-h-[300px] sm:min-h-[400px]">
               <textarea
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 placeholder="Empieza a escribir aquí..."
-                className="flex-1 w-full bg-transparent p-6 text-neutral-200 placeholder:text-neutral-700 outline-none resize-none leading-relaxed text-lg scrollbar-thin scrollbar-thumb-white/10"
+                className="flex-1 w-full bg-transparent p-4 sm:p-6 text-sm sm:text-lg text-neutral-200 placeholder:text-neutral-700 outline-none resize-none leading-relaxed scrollbar-thin scrollbar-thumb-white/10"
               />
               
-              <div className="p-4 border-t border-white/5 bg-black/20 flex gap-3 justify-end">
+              <div className="p-3 sm:p-4 border-t border-white/5 bg-black/20 flex gap-3 justify-end">
                 <Button 
                   onClick={handleSchedule}
                   disabled={!content || !selectedPageId || scheduling}
-                  className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
+                  className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2 h-10 px-4 text-sm"
                 >
-                  {scheduling ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
+                  {scheduling ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                   {scheduling ? "Enviando..." : "Enviar al Programador"}
                 </Button>
               </div>

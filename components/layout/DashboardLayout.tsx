@@ -33,7 +33,7 @@ export function DashboardLayout({ children, user }: { children: React.ReactNode;
       
       <div className="relative z-10 flex flex-1 flex-col overflow-hidden">
         <Topbar user={user} onOpenSidebar={() => setIsSidebarOpen(true)} />
-        <main className="flex-1 overflow-y-auto bg-transparent p-4 sm:p-6 lg:p-8">
+        <main className="flex-1 overflow-y-auto bg-transparent p-3 sm:p-6 lg:p-8">
           {children}
         </main>
       </div>
