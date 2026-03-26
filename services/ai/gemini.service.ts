@@ -7,7 +7,7 @@ export class GeminiService implements AIProvider {
 
   constructor() {
     this.genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-    this.model = this.genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    this.model = this.genAI.getGenerativeModel({ model: "gemma-3-1b-it" });
   }
 
   async generateContent({ topic, tone, context }: ContentGenerationParams): Promise<string> {

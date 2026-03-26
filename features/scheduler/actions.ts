@@ -25,33 +25,6 @@ export async function schedulePost(formData: FormData) {
   return { success: true };
 }
 
-export async function connectPage(formData: FormData) {
-  const facebookPageId = formData.get('facebookPageId') as string;
-  const pageName = formData.get('pageName') as string;
-  const accessToken = formData.get('accessToken') as string;
-
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error('Unauthorized');
-
-  const repo = new PageRepository();
-  const result = await repo.savePage({
-    user_id: user.id,
-    facebook_page_id: facebookPageId,
-    page_name: pageName,
-    access_token: accessToken,
-    followers_count: 0,
-    fans_count: 0
-  });
-
-  if (!result.success) {
-    throw new Error(result.error || 'Failed to connect page');
-  }
-
-  revalidatePath('/dashboard/pages');
-  revalidatePath('/dashboard/schedule');
-  return { success: true };
-}
 
 export async function deletePage(id: string) {
   const repo = new PageRepository();

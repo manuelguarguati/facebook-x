@@ -1,29 +1,32 @@
 'use client';
 
 import { useState } from 'react';
-import { connectPage } from '@/features/scheduler/actions';
 import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { Label } from '@/components/ui/Label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card';
-
 import { useTranslation } from '@/src/lib/i18n/LanguageContext';
+import { createClient } from '@/lib/supabase/client';
 
 export function ConnectPageForm() {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
+  const supabase = createClient();
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setLoading(true);
-    const formData = new FormData(e.currentTarget);
+  const handleConnect = async () => {
     try {
-      await connectPage(formData);
-      (e.target as HTMLFormElement).reset();
-      alert(t('pages.success_alert'));
-    } catch (error: unknown) {
-      alert((error as Error).message);
-    } finally {
+      setLoading(true);
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'facebook',
+        options: {
+          scopes: 'pages_show_list, pages_read_engagement, pages_manage_posts',
+          redirectTo: `${window.location.origin}/auth/callback?sync=true&next=/dashboard/pages`
+        }
+      });
+      if (error) {
+        throw error;
+      }
+      // El redireccionamiento ocurre automáticamente si no hay error
+    } catch (error: any) {
+      alert(error.message || 'Error al conectar con Facebook');
       setLoading(false);
     }
   };
@@ -33,30 +36,20 @@ export function ConnectPageForm() {
       <CardHeader>
         <CardTitle>{t('pages.connect_title')}</CardTitle>
         <CardDescription>
-          {t('pages.connect_description')}
+          {t('pages.connect_description_oauth') || 'Conecta tu cuenta de Facebook para sincronizar automáticamente tus páginas y estadísticas.'}
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="pageName">{t('pages.name_label')}</Label>
-            <Input id="pageName" name="pageName" placeholder={t('pages.name_placeholder')} required />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="facebookPageId">{t('pages.id_label')}</Label>
-            <Input id="facebookPageId" name="facebookPageId" placeholder={t('pages.id_placeholder')} required />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="accessToken">{t('pages.token_label')}</Label>
-            <Input id="accessToken" name="accessToken" type="password" placeholder={t('pages.token_placeholder')} required />
-            <p className="text-xs text-neutral-500">
-              {t('pages.token_help')}
-            </p>
-          </div>
-          <Button type="submit" disabled={loading} className="w-full">
-            {loading ? t('pages.button_loading') : t('pages.button_idle')}
-          </Button>
-        </form>
+        <Button 
+          onClick={handleConnect} 
+          disabled={loading} 
+          className="w-full bg-[#1877F2] hover:bg-[#166fe5] text-white border-none shadow-md flex items-center justify-center gap-2"
+        >
+          <svg className="h-5 w-5 fill-current" viewBox="0 0 24 24">
+             <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+          </svg>
+          {loading ? t('pages.button_loading') : 'Conectar con Facebook'}
+        </Button>
       </CardContent>
     </Card>
   );
