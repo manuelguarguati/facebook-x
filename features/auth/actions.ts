@@ -91,6 +91,35 @@ export async function signInWithFacebookAction() {
   }
 }
 
+export async function signInWithGoogleAction() {
+  const host = (await headers()).get('host');
+  const protocol = host?.includes('localhost') ? 'http' : 'https';
+  const origin = `${protocol}://${host}`;
+  const redirectUrl = `${origin}/auth/callback?next=/dashboard`;
+
+  console.log('DEBUG: Google OAuth Redirect URL:', redirectUrl);
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: redirectUrl,
+      queryParams: {
+        access_type: 'offline',
+        prompt: 'consent',
+      },
+    },
+  });
+
+  if (error) {
+    return redirect(`/login?error=${error.message}`);
+  }
+
+  if (data.url) {
+    return redirect(data.url);
+  }
+}
+
 export async function signOutAction() {
   const supabase = await createClient();
   await supabase.auth.signOut();

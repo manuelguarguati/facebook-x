@@ -24,7 +24,9 @@
     "sign_in_button": "Iniciar Sesión",
     "create_account_button": "Crear Cuenta",
     "already_have_account": "¿Ya tienes una cuenta? Inicia Sesión",
-    "dont_have_account": "¿No tienes cuenta? Regístrate"
+    "dont_have_account": "¿No tienes cuenta? Regístrate",
+    "or_continue_with": "O continúa con",
+    "sign_in_with_google": "Iniciar sesión con Google"
   },
   "dashboard": {
     "sidebar": {

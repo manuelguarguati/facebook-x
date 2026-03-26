@@ -8,11 +8,13 @@ import { AiGenerator } from '@/features/ai/components/AiGenerator';
 
 interface DashboardContentProps {
   userEmail: string;
+  userName?: string;
+  userAvatar?: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   recentIdeas: any[];
 }
 
-export function DashboardContent({ userEmail, recentIdeas }: DashboardContentProps) {
+export function DashboardContent({ userEmail, userName, userAvatar, recentIdeas }: DashboardContentProps) {
   const { t } = useTranslation();
 
   const stats = [
@@ -27,7 +29,7 @@ export function DashboardContent({ userEmail, recentIdeas }: DashboardContentPro
       <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-900 dark:text-neutral-50 text-balance">
-            {t('dashboard.welcome')}, {userEmail.split('@')[0] || 'User'}
+            {t('dashboard.welcome')}, {userName || userEmail.split('@')[0] || 'User'}
           </h1>
           <p className="mt-1 text-sm sm:text-base text-neutral-500 dark:text-neutral-400">
             {t('dashboard.subtitle')}

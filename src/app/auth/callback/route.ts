@@ -12,21 +12,20 @@ export async function GET(request: Request) {
     const supabase = await createClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     
-    if (!error && sync) {
-      try {
-        await syncFacebookPagesAction();
-      } catch (syncError) {
-        console.error('Auto-sync failed:', syncError);
-        // We still redirect, but maybe with an error param
-        return NextResponse.redirect(`${origin}${next}?error=Sync failed`);
-      }
-    }
-    
     if (!error) {
+      if (sync) {
+        try {
+          await syncFacebookPagesAction();
+        } catch (syncError) {
+          console.error('Auto-sync failed:', syncError);
+          // We still redirect, but maybe with an error param
+          return NextResponse.redirect(`${origin}${next}?error=Sync failed`);
+        }
+      }
       return NextResponse.redirect(`${origin}${next}`);
     }
   }
 
   // Return the user to an error page with instructions
-  return NextResponse.redirect(`${origin}/login?error=Could not authenticate with Facebook`);
+  return NextResponse.redirect(`${origin}/login?error=Authentication failed`);
 }
