@@ -8,11 +8,11 @@ export class OpenAIService implements AIProvider {
     this.client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
   }
 
-  async generateContent({ topic, tone, context }: ContentGenerationParams): Promise<string> {
+  async generateContent({ topic, tone, context, language }: ContentGenerationParams): Promise<string> {
     const response = await this.client.chat.completions.create({
       model: 'gpt-4o',
       messages: [
-        { role: 'system', content: `You are an expert social media AI. Target tone: ${tone}.` },
+        { role: 'system', content: `You are an expert social media AI. Target tone: ${tone}. IMPORTANT: You must write EVERYTHING in ${language || 'Spanish'} language.` },
         { role: 'user', content: `Write an engaging post about: ${topic}. Context: ${context || 'None'}` }
       ]
     });

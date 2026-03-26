@@ -26,11 +26,15 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     if (saved && (saved === 'en' || saved === 'es')) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setLanguage(saved);
+      document.cookie = `NEXT_LOCALE=${saved}; path=/; max-age=31536000; SameSite=Lax`;
+    } else {
+      document.cookie = `NEXT_LOCALE=es; path=/; max-age=31536000; SameSite=Lax`;
     }
   }, []);
 
   useEffect(() => {
     localStorage.setItem('app-language', language);
+    document.cookie = `NEXT_LOCALE=${language}; path=/; max-age=31536000; SameSite=Lax`;
   }, [language]);
 
   const t = (path: string) => {
