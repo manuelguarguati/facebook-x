@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function PostList({ posts }: { posts: any[] }) {
   if (!posts.length) return <div className="p-8 text-center text-neutral-500 bg-white rounded-xl border">No scheduled posts.</div>;
 

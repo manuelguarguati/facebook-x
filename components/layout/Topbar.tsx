@@ -8,7 +8,8 @@ interface TopbarProps {
   onOpenSidebar: () => void;
 }
 
-export function Topbar({ user, onOpenSidebar }: TopbarProps) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function Topbar({ user, onOpenSidebar }: { user: any; onOpenSidebar: () => void }) {
   // Extract initial for avatar
   const initials = user?.email ? user.email.substring(0, 2).toUpperCase() : "US";
 

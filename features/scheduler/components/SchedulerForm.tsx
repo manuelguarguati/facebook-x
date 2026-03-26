@@ -22,8 +22,8 @@ export function SchedulerForm({ pages }: SchedulerFormProps) {
       await schedulePost(formData);
       (e.target as HTMLFormElement).reset();
       alert(t('scheduler.success_alert'));
-    } catch (error: any) {
-      alert(error.message);
+    } catch (error: unknown) {
+      alert((error as Error).message);
     } finally {
       setLoading(false);
     }

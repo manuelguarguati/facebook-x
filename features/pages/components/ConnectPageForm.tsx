@@ -21,8 +21,8 @@ export function ConnectPageForm() {
       await connectPage(formData);
       (e.target as HTMLFormElement).reset();
       alert(t('pages.success_alert'));
-    } catch (error: any) {
-      alert(error.message);
+    } catch (error: unknown) {
+      alert((error as Error).message);
     } finally {
       setLoading(false);
     }

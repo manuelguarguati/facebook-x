@@ -8,6 +8,7 @@ import { AiGenerator } from '@/features/ai/components/AiGenerator';
 
 interface DashboardContentProps {
   userEmail: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   recentIdeas: any[];
 }
 

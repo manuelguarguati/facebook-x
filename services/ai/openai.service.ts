@@ -19,7 +19,7 @@ export class OpenAIService implements AIProvider {
     return response.choices[0].message.content || '';
   }
 
-  async analyzeMetrics(data: any): Promise<any> {
+  async analyzeMetrics(data: unknown): Promise<unknown> {
     return { inferred_sentiment: 'positive', data };
   }
 }

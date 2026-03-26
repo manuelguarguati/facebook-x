@@ -4,6 +4,7 @@ import { useTranslation } from '@/src/lib/i18n/LanguageContext';
 import { SchedulerForm } from '@/features/scheduler/components/SchedulerForm';
 import { ScheduledList } from '@/features/scheduler/components/ScheduledList';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function ScheduleContent({ posts, pages }: { posts: any[]; pages: any[] }) {
   const { t } = useTranslation();
 

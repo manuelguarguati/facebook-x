@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { LayoutDashboard, Newspaper, Calendar, X, Settings } from 'lucide-react';
+import { LayoutDashboard, Newspaper, Calendar, X, Settings, Wand2, PenTool } from 'lucide-react';
 import { signOutAction } from '@/features/auth/actions';
 import { useTranslation } from '@/src/lib/i18n/LanguageContext';
 import { LanguageSwitcher } from '@/src/lib/i18n/LanguageSwitcher';
@@ -25,10 +25,16 @@ export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
       active: pathname === "/dashboard",
     },
     {
-      href: "/dashboard/news",
-      label: t('dashboard.sidebar.studio'),
-      icon: Newspaper,
-      active: pathname?.includes("/dashboard/news"),
+      href: "/dashboard/studio/ai",
+      label: t('dashboard.sidebar.studio_ai'),
+      icon: Wand2,
+      active: pathname?.includes("/dashboard/studio/ai"),
+    },
+    {
+      href: "/dashboard/studio/manual",
+      label: t('dashboard.sidebar.studio_manual'),
+      icon: PenTool,
+      active: pathname?.includes("/dashboard/studio/manual"),
     },
     {
       href: "/dashboard/schedule",

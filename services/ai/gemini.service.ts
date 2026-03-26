@@ -1,9 +1,9 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenerativeAI, GenerativeModel } from "@google/generative-ai";
 import { AIProvider, ContentGenerationParams } from './ai.provider';
 
 export class GeminiService implements AIProvider {
   private genAI: GoogleGenerativeAI;
-  private model: any;
+  private model: GenerativeModel;
 
   constructor() {
     this.genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
@@ -22,7 +22,7 @@ export class GeminiService implements AIProvider {
     return response.text();
   }
 
-  async analyzeMetrics(data: any): Promise<any> {
+  async analyzeMetrics(data: unknown): Promise<unknown> {
     return { inferred_sentiment: 'positive', data };
   }
 }

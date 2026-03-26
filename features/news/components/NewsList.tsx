@@ -14,8 +14,8 @@ export function NewsList({ news }: { news: NewsItem[] }) {
     try {
       const res = await transformNewsToPost(item.title, item.url);
       if (res.success) alert(t('news.alert_title') + res.content);
-    } catch (error: any) {
-      alert(error.message);
+    } catch (error: unknown) {
+      alert((error as Error).message);
     } finally {
       setLoadingTitle(null);
     }

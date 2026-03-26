@@ -1,0 +1,119 @@
+﻿
+> manuel-asistente-ia@0.1.0 lint
+> eslint
+
+
+C:\Users\manuel\Desktop\proyecto x facebook\TECHUS\components\layout\DashboardLayout.tsx
+   9:88  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+  15:5   error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\manuel\Desktop\proyecto x facebook\TECHUS\components\layout\DashboardLayout.tsx:15:5
+  13 |   // Close sidebar on route change for mobile
+  14 |   useEffect(() => {
+> 15 |     setIsSidebarOpen(false);
+     |     ^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  16 |   }, [pathname]);
+  17 |
+  18 |   // Lock body scroll when mobile menu is open  react-hooks/set-state-in-effect
+
+C:\Users\manuel\Desktop\proyecto x facebook\TECHUS\components\layout\Sidebar.tsx
+  6:27  warning  'Newspaper' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\manuel\Desktop\proyecto x facebook\TECHUS\components\layout\Topbar.tsx
+  7:9  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\manuel\Desktop\proyecto x facebook\TECHUS\components\shared\Topbar.tsx
+  1:42  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\manuel\Desktop\proyecto x facebook\TECHUS\features\ai\actions.ts
+  23:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\manuel\Desktop\proyecto x facebook\TECHUS\features\ai\components\AiGenerator.tsx
+  20:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\manuel\Desktop\proyecto x facebook\TECHUS\features\news\components\NewsList.tsx
+  17:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\manuel\Desktop\proyecto x facebook\TECHUS\features\pages\components\ConnectPageForm.tsx
+  24:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\manuel\Desktop\proyecto x facebook\TECHUS\features\posts\components\PostList.tsx
+  1:46  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\manuel\Desktop\proyecto x facebook\TECHUS\features\scheduler\components\ScheduledList.tsx
+  5:51  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\manuel\Desktop\proyecto x facebook\TECHUS\features\scheduler\components\SchedulerForm.tsx
+  25:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\manuel\Desktop\proyecto x facebook\TECHUS\features\studio\ai-studio.actions.ts
+   69:21  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   74:19  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   89:12  warning  'error' is defined but never used         @typescript-eslint/no-unused-vars
+  110:12  warning  'error' is defined but never used         @typescript-eslint/no-unused-vars
+  124:12  warning  'error' is defined but never used         @typescript-eslint/no-unused-vars
+  138:12  warning  'error' is defined but never used         @typescript-eslint/no-unused-vars
+
+C:\Users\manuel\Desktop\proyecto x facebook\TECHUS\services\ai\ai.provider.ts
+  12:24  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  12:38  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\manuel\Desktop\proyecto x facebook\TECHUS\services\ai\gemini.service.ts
+   6:18  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  25:30  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  25:44  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\manuel\Desktop\proyecto x facebook\TECHUS\services\ai\openai.service.ts
+  22:30  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  22:44  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\manuel\Desktop\proyecto x facebook\TECHUS\services\news\news.service.ts
+  21:55  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\manuel\Desktop\proyecto x facebook\TECHUS\src\app\dashboard\DashboardContent.tsx
+  11:16  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\manuel\Desktop\proyecto x facebook\TECHUS\src\app\dashboard\news\NewsContent.tsx
+  6:57  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\manuel\Desktop\proyecto x facebook\TECHUS\src\app\dashboard\pages\PagesContent.tsx
+  15:50  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\manuel\Desktop\proyecto x facebook\TECHUS\src\app\dashboard\schedule\ScheduleContent.tsx
+  7:60  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  7:74  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\manuel\Desktop\proyecto x facebook\TECHUS\src\app\dashboard\studio\ai\page.tsx
+  11:10  warning  'cn' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\manuel\Desktop\proyecto x facebook\TECHUS\src\lib\i18n\LanguageContext.tsx
+   7:6   warning  'Translations' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                @typescript-eslint/no-unused-vars
+  16:38  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                @typescript-eslint/no-explicit-any
+  26:7   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\manuel\Desktop\proyecto x facebook\TECHUS\src\lib\i18n\LanguageContext.tsx:26:7
+  24 |     const saved = localStorage.getItem('app-language') as Language;
+  25 |     if (saved && (saved === 'en' || saved === 'es')) {
+> 26 |       setLanguage(saved);
+     |       ^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  27 |     }
+  28 |   }, []);
+  29 |  react-hooks/set-state-in-effect
+
+C:\Users\manuel\Desktop\proyecto x facebook\TECHUS\src\lib\i18n\LanguageSwitcher.tsx
+  6:10  warning  'Languages' is defined but never used  @typescript-eslint/no-unused-vars
+
+Ô£û 36 problems (28 errors, 8 warnings)
+

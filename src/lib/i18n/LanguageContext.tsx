@@ -13,6 +13,7 @@ interface LanguageContextType {
   t: (key: string) => string;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const translations: Record<Language, any> = { en, es };
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
@@ -23,6 +24,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const saved = localStorage.getItem('app-language') as Language;
     if (saved && (saved === 'en' || saved === 'es')) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLanguage(saved);
     }
   }, []);

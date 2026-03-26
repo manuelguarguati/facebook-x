@@ -9,7 +9,7 @@ export interface ContentGenerationParams {
 
 export interface AIProvider {
   generateContent(params: ContentGenerationParams): Promise<string>;
-  analyzeMetrics(data: any): Promise<any>;
+  analyzeMetrics(data: unknown): Promise<unknown>;
 }
 
 export async function generateWithFallback(params: ContentGenerationParams): Promise<string> {

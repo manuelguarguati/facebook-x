@@ -2,6 +2,7 @@
 
 import { useTranslation } from '@/src/lib/i18n/LanguageContext';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function ScheduledList({ posts }: { posts: any[] }) {
   const { t } = useTranslation();
   if (!posts.length) return <div className="p-8 text-center text-neutral-500 bg-white dark:bg-neutral-900 rounded-xl border dark:border-white/5">{t('scheduler.list_empty')}</div>;

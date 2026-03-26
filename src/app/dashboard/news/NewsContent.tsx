@@ -3,6 +3,7 @@
 import { useTranslation } from '@/src/lib/i18n/LanguageContext';
 import { NewsList } from '@/features/news/components/NewsList';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function NewsContent({ newsItems }: { newsItems: any[] }) {
   const { t } = useTranslation();
 

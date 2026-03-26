@@ -30,6 +30,8 @@
     "sidebar": {
       "dashboard": "Tablero",
       "studio": "Estudio de Contenido",
+      "studio_ai": "Estudio IA",
+      "studio_manual": "Estudio Manual",
       "scheduler": "Programador",
       "pages": "Páginas de Facebook",
       "sign_out": "Cerrar Sesión"

@@ -20,8 +20,8 @@ export async function generateIdea(formData: FormData) {
 
     revalidatePath('/dashboard');
     return { success: true, content };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('AI Generation Error:', error);
-    return { success: false, error: error.message || 'Error al generar contenido' };
+    return { success: false, error: (error as Error).message || 'Error al generar contenido' };
   }
 }

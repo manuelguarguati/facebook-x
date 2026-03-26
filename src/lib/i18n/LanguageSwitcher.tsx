@@ -3,7 +3,7 @@
 import React from 'react';
 import { useTranslation } from './LanguageContext';
 import { Button } from '@/components/ui/Button';
-import { Languages } from 'lucide-react';
+// Unused import removed
 
 export function LanguageSwitcher() {
   const { language, setLanguage } = useTranslation();

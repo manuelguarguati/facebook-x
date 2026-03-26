@@ -6,12 +6,13 @@ import { Sidebar } from "./Sidebar";
 import { Topbar } from "./Topbar";
 import { BackgroundGlows } from "@/components/ui/BackgroundGlows";
 
-export function DashboardLayout({ children, user }: { children: React.ReactNode; user: any }) {
+export function DashboardLayout({ children, user }: { children: React.ReactNode; user: unknown }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const pathname = usePathname();
 
   // Close sidebar on route change for mobile
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsSidebarOpen(false);
   }, [pathname]);
 

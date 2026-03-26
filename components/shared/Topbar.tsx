@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function Topbar({ user }: { user: any }) {
   return (
     <header className="h-16 border-b bg-white flex items-center px-8 justify-between shadow-sm z-10">

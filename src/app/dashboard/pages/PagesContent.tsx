@@ -12,6 +12,7 @@ import { refreshSinglePageStats } from '@/features/pages/actions';
 import { useSearchParams } from 'next/navigation';
 
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function PagesContent({ pages }: { pages: any[] }) {
   const { t } = useTranslation();
   const searchParams = useSearchParams();

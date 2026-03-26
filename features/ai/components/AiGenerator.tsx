@@ -16,7 +16,7 @@ export function AiGenerator() {
     const formData = new FormData(e.currentTarget);
     try {
       const res = await generateIdea(formData);
-      if (res.success) setResult(res.content);
+      if (res.success && res.content) setResult(res.content);
     } catch (error: any) {
       alert(error.message);
     } finally {
