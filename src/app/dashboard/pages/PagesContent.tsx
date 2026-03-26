@@ -5,7 +5,6 @@ import { ConnectPageForm } from '@/features/pages/components/ConnectPageForm';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
-import { FacebookSyncButton } from '@/features/pages/components/FacebookSyncButton';
 import { RefreshCw, Trash2, Users, Heart, AlertCircle } from 'lucide-react';
 import { deletePage } from '@/features/scheduler/actions';
 import { refreshSinglePageStats } from '@/features/pages/actions';
@@ -35,7 +34,6 @@ export function PagesContent({ pages }: { pages: any[] }) {
             {t('pages.subtitle')}
           </p>
         </div>
-        <FacebookSyncButton />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

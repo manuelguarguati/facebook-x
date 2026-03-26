@@ -96,6 +96,7 @@
     "active": "Activa",
     "connect_title": "Conectar Nueva Página",
     "connect_description": "Introduce los detalles de tu página de Facebook manualmente.",
+    "connect_description_oauth": "Conecta tu cuenta de Facebook para sincronizar automáticamente tus páginas y estadísticas.",
     "name_label": "Nombre de la Página",
     "name_placeholder": "Mi Increíble Página",
     "id_label": "ID de Página de Facebook",
