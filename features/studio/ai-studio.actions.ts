@@ -95,6 +95,7 @@ export async function saveScheduledPostAction(data: {
   page_id: string;
   content: string;
   scheduled_for: string;
+  media_url?: string;
 }) {
   try {
     const repo = new ScheduledPostRepository();
@@ -109,6 +110,32 @@ export async function saveScheduledPostAction(data: {
     return result;
   } catch (error) {
     return { success: false, error: 'Error saving scheduled post' };
+  }
+}
+
+export async function analyzeImageAction(base64Image: string, mimeType: string) {
+  try {
+    const prompt = `Analiza esta imagen detalladamente y genera una descripción viral y atractiva para un post de Facebook. 
+    Incluye un gancho inicial, el cuerpo del mensaje y algunos hashtags relevantes. 
+    Responde UNICAMENTE con el contenido del post en español.`;
+
+    const content = await generateWithFallback({
+      topic: 'image analysis',
+      tone: 'viral',
+      context: prompt,
+      raw: true,
+      image: {
+        inlineData: {
+          data: base64Image,
+          mimeType: mimeType
+        }
+      }
+    });
+
+    return { success: true, content };
+  } catch (error: any) {
+    console.error('Image Analysis Error:', error);
+    return { success: false, error: 'Error al analizar la imagen con IA' };
   }
 }
 

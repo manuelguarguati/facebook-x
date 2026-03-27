@@ -10,9 +10,18 @@ export class GeminiService implements AIProvider {
     this.model = this.genAI.getGenerativeModel({ model: "gemma-3-1b-it" });
   }
 
-  async generateContent({ topic, tone, context, language, raw }: ContentGenerationParams): Promise<string> {
+  async generateContent({ topic, tone, context, language, raw, image }: ContentGenerationParams): Promise<string> {
+    const modelId = image ? "gemini-1.5-flash" : "gemma-3-1b-it";
+    const currentModel = this.genAI.getGenerativeModel({ model: modelId });
+
     if (raw) {
-      const result = await this.model.generateContent(context || topic);
+      const parts: any[] = [context || topic];
+      if (image?.inlineData) {
+        parts.push({
+          inlineData: image.inlineData
+        });
+      }
+      const result = await currentModel.generateContent(parts);
       const response = await result.response;
       return response.text();
     }
@@ -23,7 +32,14 @@ export class GeminiService implements AIProvider {
     
     IMPORTANT: Return ONLY the content of the post in ${language || 'Spanish'}, no explanations or extra text.`;
     
-    const result = await this.model.generateContent(prompt);
+    const parts: any[] = [prompt];
+    if (image?.inlineData) {
+      parts.push({
+        inlineData: image.inlineData
+      });
+    }
+
+    const result = await currentModel.generateContent(parts);
     const response = await result.response;
     return response.text();
   }

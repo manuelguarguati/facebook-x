@@ -8,6 +8,13 @@ export interface ContentGenerationParams {
   context?: string;
   language?: string;
   raw?: boolean;
+  image?: {
+    inlineData?: {
+      data: string;
+      mimeType: string;
+    };
+    url?: string;
+  };
 }
 
 export interface AIProvider {

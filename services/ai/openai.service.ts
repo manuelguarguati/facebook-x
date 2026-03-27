@@ -8,24 +8,49 @@ export class OpenAIService implements AIProvider {
     this.client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
   }
 
-  async generateContent({ topic, tone, context, language, raw }: ContentGenerationParams): Promise<string> {
+  async generateContent({ topic, tone, context, language, raw, image }: ContentGenerationParams): Promise<string> {
+    const messages: any[] = [];
+    
     if (raw) {
-      const response = await this.client.chat.completions.create({
-        model: 'gpt-4o',
-        messages: [
-          { role: 'user', content: context || topic }
-        ]
+      const content: any[] = [{ type: 'text', text: context || topic }];
+      if (image?.inlineData) {
+        content.push({
+          type: 'image_url',
+          image_url: { url: `data:${image.inlineData.mimeType};base64,${image.inlineData.data}` }
+        });
+      } else if (image?.url) {
+        content.push({
+          type: 'image_url',
+          image_url: { url: image.url }
+        });
+      }
+      messages.push({ role: 'user', content });
+    } else {
+      messages.push({ 
+        role: 'system', 
+        content: `You are an expert social media AI. Target tone: ${tone}. IMPORTANT: You must write EVERYTHING in ${language || 'Spanish'} language.` 
       });
-      return response.choices[0].message.content || '';
+      
+      const userContent: any[] = [{ type: 'text', text: `Write an engaging post about: ${topic}. Context: ${context || 'None'}` }];
+      if (image?.inlineData) {
+        userContent.push({
+          type: 'image_url',
+          image_url: { url: `data:${image.inlineData.mimeType};base64,${image.inlineData.data}` }
+        });
+      } else if (image?.url) {
+        userContent.push({
+          type: 'image_url',
+          image_url: { url: image.url }
+        });
+      }
+      messages.push({ role: 'user', content: userContent });
     }
 
     const response = await this.client.chat.completions.create({
       model: 'gpt-4o',
-      messages: [
-        { role: 'system', content: `You are an expert social media AI. Target tone: ${tone}. IMPORTANT: You must write EVERYTHING in ${language || 'Spanish'} language.` },
-        { role: 'user', content: `Write an engaging post about: ${topic}. Context: ${context || 'None'}` }
-      ]
+      messages
     });
+    
     return response.choices[0].message.content || '';
   }
 
