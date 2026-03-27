@@ -10,7 +10,13 @@ export class GeminiService implements AIProvider {
     this.model = this.genAI.getGenerativeModel({ model: "gemma-3-1b-it" });
   }
 
-  async generateContent({ topic, tone, context, language }: ContentGenerationParams): Promise<string> {
+  async generateContent({ topic, tone, context, language, raw }: ContentGenerationParams): Promise<string> {
+    if (raw) {
+      const result = await this.model.generateContent(context || topic);
+      const response = await result.response;
+      return response.text();
+    }
+
     const prompt = `You are an expert social media AI. Target tone: ${tone}. 
     Write an engaging, viral post for social media about: ${topic}. 
     Context: ${context || 'None'}

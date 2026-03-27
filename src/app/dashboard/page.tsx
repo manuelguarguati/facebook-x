@@ -10,7 +10,7 @@ export default async function DashboardPage() {
 
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  
+
   const profile = user ? await userRepo.getUserProfile(user.id) : null;
 
   return (

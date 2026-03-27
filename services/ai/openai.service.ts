@@ -8,7 +8,17 @@ export class OpenAIService implements AIProvider {
     this.client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
   }
 
-  async generateContent({ topic, tone, context, language }: ContentGenerationParams): Promise<string> {
+  async generateContent({ topic, tone, context, language, raw }: ContentGenerationParams): Promise<string> {
+    if (raw) {
+      const response = await this.client.chat.completions.create({
+        model: 'gpt-4o',
+        messages: [
+          { role: 'user', content: context || topic }
+        ]
+      });
+      return response.choices[0].message.content || '';
+    }
+
     const response = await this.client.chat.completions.create({
       model: 'gpt-4o',
       messages: [

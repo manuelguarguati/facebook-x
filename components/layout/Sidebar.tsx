@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { LayoutDashboard, Newspaper, Calendar, X, Settings, Wand2, PenTool } from 'lucide-react';
+import { LayoutDashboard, Newspaper, Calendar, X, Settings, Wand2, PenTool, TrendingUp } from 'lucide-react';
 import { signOutAction } from '@/features/auth/actions';
 import { useTranslation } from '@/src/lib/i18n/LanguageContext';
 import { LanguageSwitcher } from '@/src/lib/i18n/LanguageSwitcher';
@@ -47,6 +47,12 @@ export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
       label: t('dashboard.sidebar.pages'),
       icon: Settings,
       active: pathname?.includes("/dashboard/pages"),
+    },
+    {
+      href: "/dashboard/growth-studio",
+      label: t('dashboard.sidebar.growth'),
+      icon: TrendingUp,
+      active: pathname?.includes("/dashboard/growth-studio"),
     },
   ];
 

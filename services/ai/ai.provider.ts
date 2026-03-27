@@ -7,6 +7,7 @@ export interface ContentGenerationParams {
   tone: 'professional' | 'casual' | 'viral' | 'informative';
   context?: string;
   language?: string;
+  raw?: boolean;
 }
 
 export interface AIProvider {
