@@ -16,28 +16,38 @@ export async function generateImageAction(prompt: string, aspectRatio: string = 
     };
     const { width, height } = dimensions[aspectRatio] || dimensions["1:1"];
     const encodedPrompt = encodeURIComponent(prompt);
-    // Ultra-minimal URL to isolate the 400 error
-    const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}`;
+    // Standard Pollinations URL with no parameters to ensure compatibility
+    const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?nologo=true&seed=${Date.now()}`;
 
-    console.log('FETCHING_URL:', imageUrl);
-
-    const imageResponse = await fetch(imageUrl, {
-      method: 'GET',
-      headers: { 'Accept': 'image/jpeg' }
-    });
-
-    if (!imageResponse.ok) {
-      const errorText = await imageResponse.text().catch(() => 'No details');
-      throw new Error(`API ${imageResponse.status}: ${errorText.substring(0, 100)}`);
-    }
-
-    const arrayBuffer = await imageResponse.arrayBuffer();
-    if (arrayBuffer.byteLength < 1000) {
-      throw new Error('La imagen generada es demasiado pequeña o inválida.');
-    }
+    // Using native HTTPS to bypass any fetch middleware/overrides that might cause 401
+    const https = require('https');
     
-    const base64 = Buffer.from(arrayBuffer).toString('base64');
-    return { success: true, imageBase64: base64, mimeType: 'image/jpeg', text: '' };
+    return new Promise((resolve) => {
+      https.get(imageUrl, (res: any) => {
+        if (res.statusCode !== 200) {
+          let body = '';
+          res.on('data', (chunk: any) => body += chunk);
+          res.on('end', () => {
+             resolve({ success: false, error: `Error de API (${res.statusCode}): ${body.substring(0, 50)}` });
+          });
+          return;
+        }
+
+        const chunks: any[] = [];
+        res.on('data', (chunk: any) => chunks.push(chunk));
+        res.on('end', () => {
+          const buffer = Buffer.concat(chunks);
+          if (buffer.byteLength < 1000) {
+            resolve({ success: false, error: 'Imagen inválida o demasiado pequeña' });
+            return;
+          }
+          const base64 = buffer.toString('base64');
+          resolve({ success: true, imageBase64: base64, mimeType: 'image/jpeg', text: '' });
+        });
+      }).on('error', (err: any) => {
+        resolve({ success: false, error: `Error de red: ${err.message}` });
+      });
+    });
   } catch (error: any) {
     console.error('GEN_ERROR:', error);
     return { success: false, error: `Fallo Crítico: ${error.message}` };
