@@ -23,42 +23,33 @@ export async function generateImageAction(prompt: string, aspectRatio: string = 
       "9:16": { width: 768, height: 1344 },
     };
     const { width, height } = dimensions[aspectRatio] || dimensions["1:1"];
-    const encodedPrompt = encodeURIComponent(prompt);
-    // Standard Pollinations URL with no parameters to ensure compatibility
-    const imageUrl = `https://gen.pollinations.ai/prompt/${encodedPrompt}?nologo=true&seed=${Date.now()}`;
 
-    // Using native HTTPS to bypass any fetch middleware/overrides that might cause 401
-    const https = require('https');
-    
-    return new Promise<StudioImageResponse>((resolve) => {
-      https.get(imageUrl, (res: any) => {
-        if (res.statusCode !== 200) {
-          let body = '';
-          res.on('data', (chunk: any) => body += chunk);
-          res.on('end', () => {
-             resolve({ success: false, error: `Error de API (${res.statusCode}): ${body.substring(0, 50)}` });
-          });
-          return;
-        }
+    const response = await fetch(
+      "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-3.5-large",
+      {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${process.env.HUGGINGFACE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          inputs: prompt,
+          parameters: { width, height }
+        }),
+      }
+    );
 
-        const chunks: any[] = [];
-        res.on('data', (chunk: any) => chunks.push(chunk));
-        res.on('end', () => {
-          const buffer = Buffer.concat(chunks);
-          if (buffer.byteLength < 1000) {
-            resolve({ success: false, error: 'Imagen inválida o demasiado pequeña' });
-            return;
-          }
-          const base64 = buffer.toString('base64');
-          resolve({ success: true, imageBase64: base64, mimeType: 'image/jpeg', text: '' });
-        });
-      }).on('error', (err: any) => {
-        resolve({ success: false, error: `Error de red: ${err.message}` });
-      });
-    });
+    if (!response.ok) {
+      const err = await response.text();
+      throw new Error(`Error al generar imagen: ${err}`);
+    }
+
+    const arrayBuffer = await response.arrayBuffer();
+    const base64 = Buffer.from(arrayBuffer).toString('base64');
+
+    return { success: true, imageBase64: base64, mimeType: 'image/jpeg', text: '' };
   } catch (error: any) {
-    console.error('GEN_ERROR:', error);
-    return { success: false, error: `Fallo Crítico: ${error.message}` };
+    return { success: false, error: error.message };
   }
 }
 
