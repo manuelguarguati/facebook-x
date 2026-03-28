@@ -5,18 +5,33 @@ import { PageRepository } from '@/repositories/page.repository';
 import { StatsRepository } from '@/repositories/stats.repository';
 import { ConnectionRepository } from '@/repositories/connection.repository';
 import { revalidatePath, revalidateTag } from 'next/cache';
+import { FacebookService } from '@/services/facebook/facebook.service';
 
 export async function syncFacebookPagesAction() {
   const supabase = await createClient();
+  const fbService = new FacebookService();
   
   // 1. Get the session to find the provider_token
   const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
   const session = sessionData?.session;
   if (sessionError || !session) throw new Error('Not authenticated');
 
-  const providerToken = session.provider_token;
-  if (!providerToken) {
+  const initialToken = session.provider_token;
+  if (!initialToken) {
     throw new Error('Facebook connection required. Please sign in with Facebook again.');
+  }
+
+  // 1.5. Exchange for a long-lived token
+  let providerToken = initialToken;
+  const appId = process.env.FACEBOOK_APP_ID;
+  const appSecret = process.env.FACEBOOK_APP_SECRET;
+
+  if (appId && appSecret) {
+    try {
+      providerToken = await fbService.exchangeToken(initialToken, appId, appSecret);
+    } catch (err) {
+      console.warn('DEBUG [Sync]: Long-lived exchange failed:', err);
+    }
   }
 
   // 2. Fetch pages from Facebook Graph API
@@ -33,16 +48,13 @@ export async function syncFacebookPagesAction() {
   const connectionRepo = new ConnectionRepository();
 
   // 2.5 Persist the main connection
-  console.log(`DEBUG [SyncAction]: Persisting main user connection...`);
   await connectionRepo.upsertConnection({
     user_id: session.user.id,
     facebook_user_id: session.user.identities?.find(i => i.provider === 'facebook')?.id || session.user.id,
     access_token: providerToken,
   });
 
-  // 3. Save each page and record snapshot stats
-  console.log(`DEBUG [SyncAction]: Syncing ${fbPages.length} pages...`);
-  
+  // 3. Save each page
   for (const fbPage of fbPages) {
     const result = await pageRepo.savePage({
       user_id: session.user.id,
@@ -53,12 +65,7 @@ export async function syncFacebookPagesAction() {
       fans_count: fbPage.fan_count || 0,
     });
 
-    if (!result.success) {
-        console.error(`DEBUG [SyncAction]: Failed to save page ${fbPage.name}:`, result.error);
-        throw new Error(`Failed to save page ${fbPage.name}: ${result.error}`);
-    }
-
-    if (result.data) {
+    if (result.success && result.data) {
         await statsRepo.recordStats({
             page_id: result.data.id,
             followers_count: fbPage.followers_count || 0,

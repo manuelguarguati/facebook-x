@@ -22,12 +22,20 @@ export function SchedulerForm({ pages }: SchedulerFormProps) {
     formData.append('publishNow', String(publishNow));
     
     try {
-      await schedulePost(formData);
+      const result = await schedulePost(formData);
+      
+      if (result && !result.success) {
+        // Mostrar error amigable de Facebook
+        alert(result.error || 'Error al procesar la publicación.');
+        return;
+      }
+
       (e.target as HTMLFormElement).reset();
       setPublishNow(false);
       alert(t('scheduler.success_alert') || '¡Acción realizada con éxito!');
     } catch (error: any) {
-      alert(error.message);
+      console.error('Frontend Error:', error);
+      alert('Hubo un error de conexión con el servidor. Inténtalo de nuevo.');
     } finally {
       setLoading(false);
     }

@@ -40,4 +40,21 @@ export class FacebookService {
 
     return { name: data.name, id: data.id };
   }
+
+  async exchangeToken(shortLivedToken: string, appId: string, appSecret: string): Promise<string> {
+    const url = new URL(`https://graph.facebook.com/oauth/access_token`);
+    url.searchParams.append('grant_type', 'fb_exchange_token');
+    url.searchParams.append('client_id', appId);
+    url.searchParams.append('client_secret', appSecret);
+    url.searchParams.append('fb_exchange_token', shortLivedToken);
+
+    const response = await fetch(url.toString());
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(`Facebook Token Exchange Error: ${data.error?.message || 'Unknown error'}`);
+    }
+
+    return data.access_token;
+  }
 }

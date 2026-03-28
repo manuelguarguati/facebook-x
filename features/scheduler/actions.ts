@@ -7,61 +7,66 @@ import { revalidatePath } from 'next/cache';
 import { FacebookService } from '@/services/facebook/facebook.service';
 
 export async function schedulePost(formData: FormData) {
-  const content = formData.get('content') as string;
-  const scheduledAt = formData.get('scheduledAt') as string;
-  const pageId = formData.get('pageId') as string;
-  const publishNow = formData.get('publishNow') === 'true';
+  try {
+    const content = formData.get('content') as string;
+    const scheduledAt = formData.get('scheduledAt') as string;
+    const pageId = formData.get('pageId') as string;
+    const publishNow = formData.get('publishNow') === 'true';
 
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error('Unauthorized');
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: 'Unauthorized' };
 
-  const repo = new ScheduledPostRepository();
-  const fbService = new FacebookService();
+    const repo = new ScheduledPostRepository();
+    const fbService = new FacebookService();
 
-  if (publishNow) {
-    // 1. Immediate Publishing
-    const { data: page, error: pageError } = await supabase
-      .from('pages')
-      .select('facebook_page_id, access_token')
-      .eq('id', pageId)
-      .single();
+    if (publishNow) {
+      // 1. Immediate Publishing
+      const { data: page, error: pageError } = await supabase
+        .from('pages')
+        .select('facebook_page_id, access_token')
+        .eq('id', pageId)
+        .single();
 
-    if (pageError || !page?.access_token) {
-      throw new Error('Could not find the access token for the selected page.');
+      if (pageError || !page?.access_token) {
+        return { success: false, error: 'No se pudo encontrar el token de la página.' };
+      }
+
+      const result = await fbService.publishPost(page.facebook_page_id, content, page.access_token);
+
+      if (!result.success) {
+        return { success: false, error: result.error };
+      }
+
+      await repo.scheduleNewPost({
+        page_id: pageId,
+        content,
+        scheduled_for: new Date().toISOString(),
+        status: 'published',
+        facebook_post_id: result.id
+      });
+    } else {
+      // 2. Scheduled Publishing
+      const scheduledDate = new Date(scheduledAt);
+      
+      if (scheduledDate < new Date()) {
+        return { success: false, error: 'La fecha no puede estar en el pasado.' };
+      }
+
+      await repo.scheduleNewPost({
+        page_id: pageId,
+        content,
+        scheduled_for: scheduledDate.toISOString(),
+        status: 'pending'
+      });
     }
 
-    const result = await fbService.publishPost(page.facebook_page_id, content, page.access_token);
-
-    if (!result.success) {
-      throw new Error(`Facebook Error: ${result.error}`);
-    }
-
-    await repo.scheduleNewPost({
-      page_id: pageId,
-      content,
-      scheduled_for: new Date().toISOString(),
-      status: 'published',
-      facebook_post_id: result.id
-    });
-  } else {
-    // 2. Scheduled Publishing
-    const scheduledDate = new Date(scheduledAt);
-    
-    if (scheduledDate < new Date()) {
-      throw new Error('Scheduled date cannot be in the past.');
-    }
-
-    await repo.scheduleNewPost({
-      page_id: pageId,
-      content,
-      scheduled_for: scheduledDate.toISOString(),
-      status: 'pending'
-    });
+    revalidatePath('/dashboard/schedule', 'page');
+    return { success: true };
+  } catch (error: any) {
+    console.error('Error in schedulePost:', error);
+    return { success: false, error: error.message || 'Error interno del servidor' };
   }
-
-  revalidatePath('/dashboard/schedule', 'page');
-  return { success: true };
 }
 
 export async function deletePage(id: string) {
