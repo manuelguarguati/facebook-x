@@ -29,6 +29,8 @@ export async function syncFacebookPagesAction() {
   const statsRepo = new StatsRepository();
 
   // 3. Save each page and record snapshot stats
+  console.log(`DEBUG [SyncAction]: Syncing ${fbPages.length} pages...`);
+  
   for (const fbPage of fbPages) {
     const result = await pageRepo.savePage({
       user_id: session.user.id,
@@ -39,7 +41,12 @@ export async function syncFacebookPagesAction() {
       fans_count: fbPage.fan_count || 0,
     });
 
-    if (result.success && result.data) {
+    if (!result.success) {
+        console.error(`DEBUG [SyncAction]: Failed to save page ${fbPage.name}:`, result.error);
+        throw new Error(`Failed to save page ${fbPage.name}: ${result.error}`);
+    }
+
+    if (result.data) {
         await statsRepo.recordStats({
             page_id: result.data.id,
             followers_count: fbPage.followers_count || 0,

@@ -25,9 +25,10 @@ export async function GET(request: Request) {
         try {
           console.log("DEBUG [AuthCallback]: Triggering Facebook sync...");
           await syncFacebookPagesAction();
-        } catch (syncError) {
+        } catch (syncError: any) {
           console.error('DEBUG [AuthCallback]: Auto-sync failed:', syncError);
-          return NextResponse.redirect(`${origin}${next}?error=Sync failed`);
+          const errorMessage = encodeURIComponent(syncError?.message || 'Sync failed');
+          return NextResponse.redirect(`${origin}${next}?error=${errorMessage}`);
         }
       }
       
