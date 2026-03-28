@@ -3,6 +3,7 @@
 import { generateWithFallback } from '@/services/ai/ai.provider';
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
+import { cookies } from 'next/headers';
 import { PageRepository } from '@/repositories/page.repository';
 import { ScheduledPostRepository } from '@/repositories/scheduled-post.repository';
 
@@ -62,12 +63,19 @@ export async function generatePost(formData: FormData) {
       'Agradecimiento a seguidores': `Escribe un mensaje genuino de agradecimiento a tu audiencia. Tono: ${tone}. Plataforma: ${platform}. Razón: ${details}. Celebra un hito o simplemente la lealtad.`,
     };
 
+    const locale = (await cookies()).get('NEXT_LOCALE')?.value || 'es';
+    const langInstruction = locale === 'en' 
+      ? "IMPORTANT: Respond ONLY in ENGLISH. Ensure the content is naturally written for English speakers." 
+      : "IMPORTANTE: Responde ÚNICAMENTE en ESPAÑOL. Asegúrate de que el lenguaje sea natural para hispanohablantes.";
+
     const basePrompt = prompts[contentType] || `Genera contenido para redes sociales sobre ${details}. Tono: ${tone}. Plataforma: ${platform}.`;
     
+    const finalPrompt = `${langInstruction}\n\n${basePrompt}`;
+
     const content = await generateWithFallback({ 
       topic: contentType, 
       tone: tone as 'professional' | 'casual' | 'viral' | 'informative', 
-      context: basePrompt 
+      context: finalPrompt 
     });
 
     return { success: true, content };
@@ -115,14 +123,15 @@ export async function saveScheduledPostAction(data: {
 
 export async function analyzeImageAction(base64Image: string, mimeType: string) {
   try {
-    const prompt = `Analiza esta imagen detalladamente y genera una descripción viral y atractiva para un post de Facebook. 
-    Incluye un gancho inicial, el cuerpo del mensaje y algunos hashtags relevantes. 
-    Responde UNICAMENTE con el contenido del post en español.`;
+    const locale = (await cookies()).get('NEXT_LOCALE')?.value || 'es';
+    const langInstruction = locale === 'en' 
+      ? "Analyze this image in detail and generate a viral, eye-catching description for a Facebook post. Include an initial hook, the message body, and relevant hashtags. Respond ONLY with the post content in ENGLISH." 
+      : "Analiza esta imagen detalladamente y genera una descripción viral y atractiva para un post de Facebook. Incluye un gancho inicial, el cuerpo del mensaje y algunos hashtags relevantes. Responde UNICAMENTE con el contenido del post en ESPAÑOL.";
 
     const content = await generateWithFallback({
       topic: 'image analysis',
       tone: 'viral',
-      context: prompt,
+      context: langInstruction,
       raw: true,
       image: {
         inlineData: {
@@ -141,7 +150,12 @@ export async function analyzeImageAction(base64Image: string, mimeType: string) 
 
 export async function generateHashtags(content: string) {
   try {
-    const prompt = `Genera 10-15 hashtags relevantes para el siguiente contenido de redes sociales. Devuelve solo los hashtags separados por espacios: \n\n${content}`;
+    const locale = (await cookies()).get('NEXT_LOCALE')?.value || 'es';
+    const langInstruction = locale === 'en' 
+      ? "Generate 10-15 relevant hashtags for the following social media content. Return ONLY the hashtags separated by spaces:" 
+      : "Genera 10-15 hashtags relevantes para el siguiente contenido de redes sociales. Devuelve solo los hashtags separados por espacios:";
+
+    const prompt = `${langInstruction} \n\n${content}`;
     const hashtags = await generateWithFallback({ 
       topic: 'hashtags', 
       tone: 'professional', 
@@ -155,7 +169,12 @@ export async function generateHashtags(content: string) {
 
 export async function generateVideoIdeas(content: string) {
   try {
-    const prompt = `Basado en este post, sugiere 3 ideas creativas para videos cortos (Reels/TikToks/Shorts). Para cada idea incluye: 1. Gancho 2. Desarrollo 3. Texto en pantalla. \n\nContenido: ${content}`;
+    const locale = (await cookies()).get('NEXT_LOCALE')?.value || 'es';
+    const langInstruction = locale === 'en' 
+      ? "Based on this post, suggest 3 creative ideas for short videos (Reels/TikToks/Shorts). For each idea include: 1. Hook 2. Development 3. Text on screen. Respond in ENGLISH." 
+      : "Basado en este post, sugiere 3 ideas creativas para videos cortos (Reels/TikToks/Shorts). Para cada idea incluye: 1. Gancho 2. Desarrollo 3. Texto en pantalla. Responde en ESPAÑOL.";
+
+    const prompt = `${langInstruction} \n\nContent: ${content}`;
     const ideas = await generateWithFallback({ 
       topic: 'video ideas', 
       tone: 'casual', 

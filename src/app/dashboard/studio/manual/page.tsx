@@ -4,15 +4,17 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Label } from '@/components/ui/Label';
-import { PenTool, Send, Loader2, Image as ImageIcon, Sparkles, X, Trash2 } from 'lucide-react';
+import { PenTool, Send, Loader2, Image as ImageIcon, Sparkles, X, Trash2, AlertCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { getPagesAction, saveScheduledPostAction, analyzeImageAction } from '@/features/studio/ai-studio.actions';
 import { ManagedPage } from '@/repositories/page.repository';
 import { createClient } from '@/lib/supabase/client';
 import { schedulePost } from '@/features/scheduler/actions';
 import { CalendarClock } from 'lucide-react';
+import { useTranslation } from '@/src/lib/i18n/LanguageContext';
 
 export default function ManualStudioPage() {
+  const { t } = useTranslation();
   const [content, setContent] = useState('');
   const [pages, setPages] = useState<ManagedPage[]>([]);
   const [selectedPageId, setSelectedPageId] = useState<string>('');
@@ -66,11 +68,11 @@ export default function ManualStudioPage() {
       if (result.success && result.content) {
         setContent(result.content);
       } else {
-        alert(result.error || "Error al analizar la imagen");
+        alert(result.error || t('studio.manual.error_analyze'));
       }
     } catch (error) {
       console.error(error);
-      alert("Error inesperado al analizar la imagen");
+      alert(t('studio.manual.error_analyze'));
     } finally {
       setAnalyzing(false);
     }
@@ -78,14 +80,13 @@ export default function ManualStudioPage() {
 
   const handleSchedule = async () => {
     if (!content || !selectedPageId) {
-      if (!selectedPageId) alert("Por favor, selecciona una página primero.");
+      if (!selectedPageId) alert(t('studio.manual.error_select_page'));
       return;
     }
     
     setScheduling(true);
     let mediaUrl = undefined;
 
-    // Upload image if present
     if (imageFile) {
       try {
         const supabase = createClient();
@@ -93,15 +94,11 @@ export default function ManualStudioPage() {
         const fileName = `${Math.random()}.${fileExt}`;
         const filePath = `manual-studio/${fileName}`;
 
-        const { error: uploadError, data } = await supabase.storage
+        const { error: uploadError } = await supabase.storage
           .from('posts')
           .upload(filePath, imageFile);
 
-        if (uploadError) {
-          // Si el bucket no existe, podrías recibir un error aquí. 
-          // En producción deberías asegurar que el bucket exista.
-          console.error('Upload error:', uploadError);
-        } else {
+        if (!uploadError) {
           const { data: { publicUrl } } = supabase.storage
             .from('posts')
             .getPublicUrl(filePath);
@@ -116,13 +113,13 @@ export default function ManualStudioPage() {
       page_id: selectedPageId,
       content: content,
       media_url: mediaUrl,
-      scheduled_for: new Date(Date.now() + 3600000).toISOString() // Default 1 hour from now
+      scheduled_for: new Date(Date.now() + 3600000).toISOString()
     });
 
     if (result.success) {
       router.push('/dashboard/schedule');
     } else {
-      alert(result.error || "Error al enviar al programador");
+      alert(result.error || t('studio.manual.error_publish'));
     }
     setScheduling(false);
   };
@@ -133,7 +130,6 @@ export default function ManualStudioPage() {
     setScheduling(true);
     let mediaUrl = undefined;
 
-    // Upload image if present (reuse logic)
     if (imageFile) {
       try {
         const supabase = createClient();
@@ -157,15 +153,15 @@ export default function ManualStudioPage() {
     try {
       const res = await schedulePost(formData);
       if (res.success) {
-        alert("¡Publicado con éxito en Facebook!");
+        alert(t('studio.manual.success_publish'));
         setContent('');
         setImageFile(null);
         setImagePreview(null);
       } else {
-        alert(res.error || "Error al publicar");
+        alert(res.error || t('studio.manual.error_publish'));
       }
     } catch (error: any) {
-      alert(error.message || "Error al publicar");
+      alert(error.message || t('studio.manual.error_publish'));
     } finally {
       setScheduling(false);
     }
@@ -176,24 +172,23 @@ export default function ManualStudioPage() {
       <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-3xl font-black text-white flex items-center gap-3">
-            <PenTool className="text-blue-500 h-8 w-8" /> Estudio Manual
+            <PenTool className="text-blue-500 h-8 w-8" /> {t('studio.manual.title')}
           </h1>
           <p className="text-neutral-400 mt-1">
-            Crea publicaciones personalizadas con ayuda de IA visual.
+            {t('studio.manual.subtitle')}
           </p>
         </div>
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Sidebar Config */}
         <div className="lg:col-span-1 space-y-6">
           <Card className="bg-neutral-900/50 border-white/5 backdrop-blur-sm">
             <CardHeader className="pb-3 text-white">
-              <CardTitle className="text-sm font-bold uppercase tracking-wider text-neutral-500">Configuración</CardTitle>
+              <CardTitle className="text-sm font-bold uppercase tracking-wider text-neutral-500">{t('studio.manual.config_title')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-2">
-                <Label className="text-neutral-400">Publicar en</Label>
+                <Label className="text-neutral-400">{t('studio.manual.publish_to')}</Label>
                 <select 
                   value={selectedPageId}
                   onChange={(e) => setSelectedPageId(e.target.value)}
@@ -201,7 +196,7 @@ export default function ManualStudioPage() {
                   disabled={pages.length === 0}
                 >
                   {pages.length === 0 ? (
-                    <option value="">No hay páginas conectadas</option>
+                    <option value="">{t('studio.manual.no_pages')}</option>
                   ) : (
                     pages.map(page => (
                       <option key={page.id} value={page.id}>{page.page_name}</option>
@@ -211,27 +206,26 @@ export default function ManualStudioPage() {
               </div>
 
               <div className="pt-4 border-t border-white/5">
-                <p className="text-[10px] text-neutral-500 mb-2 uppercase font-bold">Resumen del Post</p>
+                <p className="text-[10px] text-neutral-500 mb-2 uppercase font-bold">{t('studio.manual.summary_title')}</p>
                 <div className="flex items-center gap-2 text-xs text-neutral-300">
                   <div className={`w-2 h-2 rounded-full ${content ? 'bg-green-500' : 'bg-red-500'}`} />
-                  {content ? 'Texto listo' : 'Esperando texto'}
+                  {content ? t('studio.manual.summary_text_ready') : t('studio.manual.summary_text_waiting')}
                 </div>
                 <div className="flex items-center gap-2 text-xs text-neutral-300 mt-2">
                   <div className={`w-2 h-2 rounded-full ${imageFile ? 'bg-blue-500' : 'bg-neutral-700'}`} />
-                  {imageFile ? 'Imagen cargada' : 'Sin imagen'}
+                  {imageFile ? t('studio.manual.summary_image_ready') : t('studio.manual.summary_image_none')}
                 </div>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Editor Main */}
         <div className="lg:col-span-3 space-y-6">
           <Card className="bg-neutral-900/50 border-white/5 overflow-hidden flex flex-col">
             <CardHeader className="border-b border-white/5 flex flex-row items-center justify-between py-4">
               <div>
-                <CardTitle className="text-lg text-white">Compositor de Contenido</CardTitle>
-                <CardDescription className="text-xs">Usa la IA para describir tus imágenes automáticamente.</CardDescription>
+                <CardTitle className="text-lg text-white">{t('studio.manual.editor_title')}</CardTitle>
+                <CardDescription className="text-xs">{t('studio.manual.editor_subtitle')}</CardDescription>
               </div>
               
               {imagePreview && (
@@ -242,15 +236,14 @@ export default function ManualStudioPage() {
                   className="border-blue-500/30 text-blue-400 hover:bg-blue-500/10 flex items-center gap-2"
                 >
                   {analyzing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-                  {analyzing ? "Analizando..." : "Análisis IA"}
+                  {analyzing ? t('studio.manual.button_analyzing') : t('studio.manual.button_analyze')}
                 </Button>
               )}
             </CardHeader>
             
             <CardContent className="p-0 flex-1 flex flex-col sm:flex-row divide-y sm:divide-y-0 sm:divide-x divide-white/5 min-h-[500px]">
-              {/* Media Section */}
               <div className="w-full sm:w-1/3 p-4 bg-black/20 flex flex-col gap-4">
-                <Label className="text-xs text-neutral-500 uppercase font-bold">Media</Label>
+                <Label className="text-xs text-neutral-500 uppercase font-bold">{t('studio.manual.media_label')}</Label>
                 
                 {imagePreview ? (
                   <div className="relative rounded-xl overflow-hidden border border-white/10 aspect-square group">
@@ -270,7 +263,7 @@ export default function ManualStudioPage() {
                     <div className="p-3 bg-white/5 rounded-full">
                       <ImageIcon className="w-6 h-6" />
                     </div>
-                    <span className="text-xs font-medium text-center px-4">Haz clic para subir una imagen</span>
+                    <span className="text-xs font-medium text-center px-4">{t('studio.manual.upload_drop')}</span>
                   </button>
                 )}
                 
@@ -283,18 +276,17 @@ export default function ManualStudioPage() {
                 />
               </div>
 
-              {/* Text Section */}
               <div className="flex-1 flex flex-col">
                 <textarea
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
-                  placeholder="Escribe la descripción de tu post aquí, o sube una foto y deja que la IA se encargue..."
+                  placeholder={t('studio.manual.placeholder_editor')}
                   className="flex-1 w-full bg-transparent p-6 text-lg text-neutral-200 placeholder:text-neutral-700 outline-none resize-none leading-relaxed"
                 />
                 
                 <div className="p-4 border-t border-white/5 bg-black/10 flex justify-between items-center">
                   <div className="text-[10px] text-neutral-600 font-mono">
-                    {content.length} caracteres
+                    {content.length} {t('studio.manual.chars_counter')}
                   </div>
                   <div className="flex gap-3">
                     <Button 
@@ -303,7 +295,7 @@ export default function ManualStudioPage() {
                       className="bg-blue-600 hover:bg-blue-700 text-white px-8 h-12 rounded-xl font-bold shadow-lg shadow-blue-500/20 active:scale-95 transition-all flex items-center gap-2"
                     >
                       {scheduling ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                      {scheduling ? "Publicando..." : "Publicar de una vez"}
+                      {scheduling ? t('studio.ai.button_scheduling') : t('studio.manual.button_publish_now')}
                     </Button>
                     
                     <Button 
@@ -313,7 +305,7 @@ export default function ManualStudioPage() {
                       className="border-neutral-700 text-neutral-400 hover:bg-white/5 px-6 h-12 rounded-xl font-bold transition-all flex items-center gap-2"
                     >
                       <CalendarClock className="w-4 h-4" />
-                      Programar
+                      {t('studio.manual.button_schedule')}
                     </Button>
                   </div>
                 </div>

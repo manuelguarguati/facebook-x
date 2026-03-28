@@ -51,17 +51,17 @@ export function DashboardContent({
       title: t('dashboard.stats.posts'),
       value: stats.totalPublishedPosts > 0 ? formatNumber(stats.totalPublishedPosts) : '0',
       sub: stats.totalPublishedPosts > 0
-        ? `${stats.totalPublishedPosts} publicado${stats.totalPublishedPosts > 1 ? 's' : ''}`
-        : 'Sin actividad',
+        ? `${stats.totalPublishedPosts} ${t('dashboard.stats.posts_sub')}`
+        : t('dashboard.stats.no_activity'),
       icon: Zap,
       gradient: 'from-blue-600/20 to-transparent',
       borderColor: 'border-blue-500/20',
       iconColor: 'text-blue-500',
     },
     {
-      title: 'Alcance Total',
+      title: t('dashboard.stats.reach'),
       value: stats.totalReach > 0 ? formatNumber(stats.totalReach) : '0',
-      sub: stats.trends.reachTrend !== 0 ? `${stats.trends.reachTrend > 0 ? '+' : ''}${stats.trends.reachTrend}% vs semana anterior` : 'Tendencia estable',
+      sub: stats.trends.reachTrend !== 0 ? `${stats.trends.reachTrend > 0 ? '+' : ''}${stats.trends.reachTrend}% ${t('dashboard.stats.reach_sub')}` : t('dashboard.stats.trend_stable'),
       trend: stats.trends.reachTrend,
       icon: TrendingUp,
       gradient: 'from-emerald-600/20 to-transparent',
@@ -69,9 +69,9 @@ export function DashboardContent({
       iconColor: 'text-emerald-500',
     },
     {
-      title: 'Engagement',
+      title: t('dashboard.stats.engagement'),
       value: stats.totalEngagement > 0 ? formatNumber(stats.totalEngagement) : '0',
-      sub: stats.trends.engagementTrend !== 0 ? `${stats.trends.engagementTrend > 0 ? '+' : ''}${stats.trends.engagementTrend}% engagement` : 'Interacción constante',
+      sub: stats.trends.engagementTrend !== 0 ? `${stats.trends.engagementTrend > 0 ? '+' : ''}${stats.trends.engagementTrend}% engagement` : t('dashboard.stats.engagement_sub'),
       trend: stats.trends.engagementTrend,
       icon: Activity,
       gradient: 'from-purple-600/20 to-transparent',
@@ -79,12 +79,12 @@ export function DashboardContent({
       iconColor: 'text-purple-500',
     },
     {
-      title: 'Programados',
+      title: t('dashboard.stats.scheduled'),
       value: String(stats.pendingPosts),
       sub:
         stats.pendingPosts > 0
-          ? `${stats.pendingPosts} en cola de espera`
-          : 'Cola vacía',
+          ? `${stats.pendingPosts} ${t('dashboard.stats.scheduled_sub_count')}`
+          : t('dashboard.stats.scheduled_sub_empty'),
       icon: CalendarClock,
       gradient: 'from-orange-600/20 to-transparent',
       borderColor: 'border-orange-500/20',
@@ -98,13 +98,13 @@ export function DashboardContent({
       <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-neutral-900 to-black p-8 sm:p-12 border border-white/5 shadow-2xl">
         <div className="relative z-10 space-y-4 max-w-2xl">
           <Badge className="bg-blue-500/10 text-blue-400 border-blue-500/20 px-3 py-1 text-[10px] uppercase tracking-widest font-bold">
-            Elite Command Center
+            {t('dashboard.hero.badge')}
           </Badge>
           <h1 className="text-4xl sm:text-5xl font-black tracking-tighter text-white">
-            {t('dashboard.welcome')}, <span className="bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">{userName || 'Creador'}</span>
+            {t('dashboard.hero.title')} <span className="bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">{userName || t('dashboard.welcome_fallback')}</span>
           </h1>
           <p className="text-neutral-400 text-lg font-medium leading-relaxed">
-            {t('dashboard.subtitle')} Gestiona tu imperio digital con inteligencia artificial de última generación.
+            {t('dashboard.hero.subtitle')}
           </p>
         </div>
         
@@ -119,9 +119,9 @@ export function DashboardContent({
         <div className="flex items-center gap-4 rounded-2xl border border-amber-500/20 bg-amber-500/5 px-6 py-4 text-sm text-amber-400 backdrop-blur-md">
           <AlertTriangle className="h-5 w-5 flex-shrink-0" />
           <p className="font-medium">
-            Tu cuenta no tiene páginas de Facebook vinculadas aún.{' '}
+            {t('dashboard.stats.no_pages_warning')}{' '}
             <Link href="/dashboard/pages" className="font-bold underline underline-offset-4 hover:text-amber-300 transition-colors">
-              Conectar mi primera página ahora
+              {t('dashboard.stats.connect_page_cta')}
             </Link>
           </p>
         </div>
@@ -191,7 +191,7 @@ export function DashboardContent({
                           className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-neutral-500 hover:text-blue-400 transition-colors"
                         >
                           <CalendarClock className="h-4 w-4" />
-                          <span>Programar</span>
+                          <span>{t('dashboard.recent.schedule_btn')}</span>
                         </Link>
                         <span className="text-[10px] text-neutral-600 font-medium uppercase tracking-widest">{t('dashboard.recent.just_now')}</span>
                       </div>
@@ -207,7 +207,7 @@ export function DashboardContent({
                       <Zap className="h-8 w-8" />
                     </div>
                     <p className="text-neutral-500 font-medium tracking-tight">
-                      No hay actividad reciente para mostrar.
+                      {t('dashboard.recent.no_items')}
                     </p>
                   </div>
                 )}

@@ -89,7 +89,9 @@ export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
                 TECHUS <span className="text-blue-500 italic">ELITE</span>
               </h1>
             </div>
-            <p className="text-[10px] text-neutral-500 uppercase tracking-[0.3em] font-bold mt-1">Creator Engine</p>
+            <p className="text-[10px] text-neutral-500 uppercase tracking-[0.3em] font-bold mt-1">
+              {t('dashboard.sidebar.ai_assistant')}
+            </p>
           </div>
           <button 
             className="lg:hidden text-neutral-400 hover:text-white p-2 hover:bg-white/5 rounded-full transition-colors"
@@ -155,8 +157,8 @@ export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
           <div className="px-4 py-2">
             <div className="rounded-2xl bg-gradient-to-br from-neutral-900 to-black p-4 border border-white/5 flex items-center justify-between">
               <div className="flex flex-col">
-                <span className="text-[10px] text-neutral-500 font-bold uppercase tracking-wider">Plan Actual</span>
-                <span className="text-xs text-white font-black italic">PRO ACCESS</span>
+                <span className="text-[10px] text-neutral-500 font-bold uppercase tracking-wider">{t('dashboard.sidebar.plan_label')}</span>
+                <span className="text-xs text-white font-black italic">{t('dashboard.sidebar.plan_pro')}</span>
               </div>
               <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
             </div>
