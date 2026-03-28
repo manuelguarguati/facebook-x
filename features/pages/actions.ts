@@ -202,7 +202,6 @@ export async function disconnectFacebookAction() {
 
     // 3. Clear cache and direct to refresh
     revalidatePath('/dashboard', 'layout');
-    revalidateTag('user_pages');
 
     return { success: true };
 }
