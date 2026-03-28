@@ -6,7 +6,7 @@ import { generatePost, generateHashtags, generateVideoIdeas, getPagesAction, sav
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Sparkles, Hash, Video, Copy, Send, Loader2, Wand2, CheckCircle2, CalendarClock } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect } from 'react';
 // Unused import removed
 import { ManagedPage } from '@/repositories/page.repository';
@@ -29,6 +29,7 @@ export default function AiStudioPage() {
   const [success, setSuccess] = useState(false);
 
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     const fetchPages = async () => {
@@ -41,7 +42,13 @@ export default function AiStudioPage() {
       }
     };
     fetchPages();
-  }, []);
+
+    // Handle incoming news/context items
+    const incomingType = searchParams.get('type');
+    const incomingDetails = searchParams.get('details');
+    if (incomingType) setContentType(incomingType);
+    if (incomingDetails) setDetails(incomingDetails);
+  }, [searchParams]);
 
   // Prompt details placeholder based on category
   const getDetailsPlaceholder = () => {

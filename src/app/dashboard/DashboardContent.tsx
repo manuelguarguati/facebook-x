@@ -8,12 +8,18 @@ import { AiGenerator } from '@/features/ai/components/AiGenerator';
 import Link from 'next/link';
 
 interface DashboardStats {
-  totalFollowers: number;    // sum of pages.followers_count
-  totalFans: number;         // sum of pages.fans_count
-  pageCount: number;         // count of pages rows
-  totalPublishedPosts: number; // count of posts rows (real published)
-  pendingPosts: number;      // count of scheduled_posts with status=pending
-  totalEngagement: number;   // sum of likes+comments+shares from posts
+  totalFollowers: number;
+  totalFans: number;
+  pageCount: number;
+  totalPublishedPosts: number;
+  pendingPosts: number;
+  totalEngagement: number;
+  totalReach: number;
+  trends: {
+    reachTrend: number;
+    engagementTrend: number;
+    followerTrend: number;
+  };
 }
 
 interface DashboardContentProps {
@@ -46,27 +52,24 @@ export function DashboardContent({
       title: t('dashboard.stats.posts'),
       value: stats.totalPublishedPosts > 0 ? formatNumber(stats.totalPublishedPosts) : '—',
       sub: stats.totalPublishedPosts > 0
-        ? `${stats.totalPublishedPosts} publicado${stats.totalPublishedPosts > 1 ? 's' : ''} en Facebook`
-        : 'Sin posts publicados aún',
+        ? `${stats.totalPublishedPosts} publicado${stats.totalPublishedPosts > 1 ? 's' : ''}`
+        : 'Sin posts aún',
       icon: Zap,
       color: 'text-blue-500',
     },
     {
-      title: t('dashboard.stats.reach'),
-      value: stats.totalFollowers > 0 ? formatNumber(stats.totalFollowers) : '—',
-      sub:
-        stats.pageCount > 0
-          ? `${stats.pageCount} página${stats.pageCount > 1 ? 's' : ''} conectada${stats.pageCount > 1 ? 's' : ''}`
-          : 'Sin páginas conectadas',
+      title: 'Alcance Total',
+      value: stats.totalReach > 0 ? formatNumber(stats.totalReach) : '—',
+      sub: stats.trends.reachTrend !== 0 ? `${stats.trends.reachTrend > 0 ? '+' : ''}${stats.trends.reachTrend}% vs semana anterior` : 'Tendencia estable',
+      trend: stats.trends.reachTrend,
       icon: Users,
       color: 'text-green-500',
     },
     {
       title: 'Enganche Total',
       value: stats.totalEngagement > 0 ? formatNumber(stats.totalEngagement) : '—',
-      sub: stats.totalEngagement > 0
-        ? 'Likes + comentarios + compartidos'
-        : 'Sin interacciones aún',
+      sub: stats.trends.engagementTrend !== 0 ? `${stats.trends.engagementTrend > 0 ? '+' : ''}${stats.trends.engagementTrend}% engagement` : 'Interacción estable',
+      trend: stats.trends.engagementTrend,
       icon: BarChart3,
       color: 'text-pink-500',
     },
@@ -112,18 +115,28 @@ export function DashboardContent({
 
       {/* Stats grid */}
       <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-        {statCards.map((stat, i) => (
-          <Card key={i} className="p-0">
+        {statCards.map((stat: any, i) => (
+          <Card key={i} className="p-0 border-neutral-200 dark:border-white/5 overflow-hidden transition-all hover:shadow-md group">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-4 px-4">
-              <CardTitle className="text-xs font-medium text-neutral-500 dark:text-neutral-400">
+              <CardTitle className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-widest">
                 {stat.title}
               </CardTitle>
-              <stat.icon className={`h-4 w-4 ${stat.color}`} />
+              <stat.icon className={`h-4 w-4 ${stat.color} group-hover:scale-125 transition-transform`} />
             </CardHeader>
             <CardContent className="px-4 pb-4">
-              <div className="text-xl sm:text-2xl font-bold dark:text-neutral-50">{stat.value}</div>
-              <p className="text-[10px] text-neutral-500 dark:text-neutral-400 mt-0.5">{stat.sub}</p>
+              <div className="flex items-end gap-2">
+                <div className="text-2xl sm:text-3xl font-black dark:text-neutral-50">{stat.value}</div>
+                {stat.trend !== undefined && stat.trend !== 0 && (
+                  <div className={`mb-1 px-1.5 py-0.5 rounded text-[10px] font-bold ${stat.trend > 0 ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'}`}>
+                    {stat.trend > 0 ? '↑' : '↓'}{Math.abs(stat.trend)}%
+                  </div>
+                )}
+              </div>
+              <p className="text-[10px] font-medium text-neutral-500 dark:text-neutral-500 mt-1">{stat.sub}</p>
             </CardContent>
+            {stat.trend !== undefined && (
+               <div className={`h-0.5 w-full ${stat.trend > 0 ? 'bg-green-500' : 'bg-red-500'} opacity-30`} />
+            )}
           </Card>
         ))}
       </div>

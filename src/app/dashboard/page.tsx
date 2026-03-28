@@ -5,6 +5,7 @@ import { UserRepository } from '@/repositories/user.repository';
 import { PageRepository } from '@/repositories/page.repository';
 import { ScheduledPostRepository } from '@/repositories/scheduled-post.repository';
 import { PostRepository } from '@/repositories/post.repository';
+import { PageAnalyticsRepository } from '@/repositories/page-analytics.repository';
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -22,6 +23,8 @@ export default async function DashboardPage() {
   let pendingPosts = 0;
   let totalPublishedPosts = 0;
   let totalEngagement = 0;
+  let totalReach = 0;
+  let trends = { reachTrend: 0, engagementTrend: 0, followerTrend: 0 };
   let userPages: any[] = [];
 
   if (user) {
@@ -29,12 +32,14 @@ export default async function DashboardPage() {
     const postRepo = new ScheduledPostRepository();
     const publishedRepo = new PostRepository();
 
-    const [followers, fans, pages, postCounts, postStats] = await Promise.all([
+    const [followers, fans, pages, postCounts, postStats, analyticsSummary, analyticsTrends] = await Promise.all([
       pageRepo.getTotalFollowers(user.id),
       pageRepo.getTotalFans(user.id),
-      pageRepo.getUserPages(user.id), // Changed from pageCount to full list
+      pageRepo.getUserPages(user.id),
       postRepo.getUserPostCounts(user.id),
       publishedRepo.getUserPostStats(user.id),
+      new PageAnalyticsRepository().getUserAnalyticsSummary(user.id),
+      new PageAnalyticsRepository().getUserAnalyticsTrends(user.id),
     ]);
 
     totalFollowers = followers;
@@ -44,6 +49,8 @@ export default async function DashboardPage() {
     pendingPosts = postCounts.pending;
     totalPublishedPosts = postStats.totalPosts;
     totalEngagement = postStats.totalEngagement;
+    totalReach = analyticsSummary.totalReach;
+    trends = analyticsTrends;
   }
 
   return (
@@ -60,6 +67,8 @@ export default async function DashboardPage() {
         totalPublishedPosts,
         pendingPosts,
         totalEngagement,
+        totalReach,
+        trends,
       }}
     />
   );

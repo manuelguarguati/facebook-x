@@ -78,4 +78,60 @@ export class PageAnalyticsRepository {
     if (error) return [];
     return data || [];
   }
+
+  /**
+   * Get weekly trend across all user pages.
+   * Compares latest 7 days vs previous 7 days.
+   */
+  async getUserAnalyticsTrends(userId: string): Promise<{
+    reachTrend: number; // percentage
+    engagementTrend: number; // percentage
+    followerTrend: number; // exact count change
+  }> {
+    const supabase = await createClient();
+    
+    // Get analytics for all user pages
+    const { data, error } = await supabase
+      .from('page_analytics')
+      .select(`
+        reach,
+        engagement,
+        followers,
+        date,
+        pages!inner ( user_id )
+      `)
+      .eq('pages.user_id', userId)
+      .order('date', { ascending: false })
+      .limit(50); // Fetch a good sample
+
+    if (error || !data || data.length < 2) {
+      return { reachTrend: 0, engagementTrend: 0, followerTrend: 0 };
+    }
+
+    // Split into current period (0-7 days) and previous period (7-14 days)
+    // For simplicity, we split the fetched records in half
+    const half = Math.floor(data.length / 2);
+    const current = data.slice(0, half);
+    const previous = data.slice(half);
+
+    const getSum = (arr: any[], key: string) => arr.reduce((sum, r) => sum + (Number(r[key]) || 0), 0);
+
+    const currentReach = getSum(current, 'reach');
+    const previousReach = getSum(previous, 'reach');
+    const reachTrend = previousReach > 0 ? ((currentReach - previousReach) / previousReach) * 100 : 0;
+
+    const currentEng = getSum(current, 'engagement') / current.length;
+    const previousEng = getSum(previous, 'engagement') / previous.length;
+    const engagementTrend = previousEng > 0 ? ((currentEng - previousEng) / previousEng) * 100 : 0;
+
+    const currentFollowers = data[0].followers || 0;
+    const previousFollowers = data[data.length - 1].followers || 0;
+    const followerTrend = currentFollowers - previousFollowers;
+
+    return {
+      reachTrend: Math.round(reachTrend),
+      engagementTrend: Math.round(engagementTrend),
+      followerTrend
+    };
+  }
 }
