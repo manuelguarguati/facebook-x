@@ -87,7 +87,9 @@
     "success_alert": "Post scheduled successfully!",
     "list_empty": "No scheduled posts yet.",
     "status_scheduled": "SCHEDULED",
-    "status_posted": "POSTED"
+    "status_posted": "POSTED",
+    "publish_now": "Publish right now to Facebook",
+    "button_publish": "Publish Now"
   },
   "pages": {
     "title": "Facebook Pages",

@@ -88,7 +88,9 @@
     "success_alert": "¡Post programado con éxito!",
     "list_empty": "No hay posts programados aún.",
     "status_scheduled": "PROGRAMADO",
-    "status_posted": "PUBLICADO"
+    "status_posted": "PUBLICADO",
+    "publish_now": "Publicar ahora mismo en Facebook",
+    "button_publish": "Publicar Ahora"
   },
   "pages": {
     "title": "Páginas de Facebook",

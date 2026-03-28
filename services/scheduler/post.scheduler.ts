@@ -14,16 +14,21 @@ export class PostScheduler {
           throw new Error('Missing page configuration or access token');
         }
 
-        const platformPostId = await this.fbService.publishPost(
+        const result = await this.fbService.publishPost(
           post.pages.facebook_page_id,
           post.content,
           post.pages.access_token
         );
 
-        console.log(`[Scheduler] Published post ${post.id} → FB id: ${platformPostId}`);
-        await this.postRepo.updatePostStatus(post.id, 'published', { facebook_post_id: platformPostId });
+        if (result.success && result.id) {
+          console.log(`[Scheduler] Published post ${post.id} → FB id: ${result.id}`);
+          await this.postRepo.updatePostStatus(post.id, 'published', { facebook_post_id: result.id });
+        } else {
+          console.error(`[Scheduler] Failed to publish post ${post.id}:`, result.error);
+          await this.postRepo.updatePostStatus(post.id, 'failed', { error_message: result.error });
+        }
       } catch (error: any) {
-        console.error(`[Scheduler] Failed to publish post ${post.id}:`, error);
+        console.error(`[Scheduler] Unexpected error publishing post ${post.id}:`, error);
         await this.postRepo.updatePostStatus(post.id, 'failed', { error_message: error.message });
       }
     }

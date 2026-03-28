@@ -13,17 +13,21 @@ interface SchedulerFormProps {
 export function SchedulerForm({ pages }: SchedulerFormProps) {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
+  const [publishNow, setPublishNow] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     const formData = new FormData(e.currentTarget);
+    formData.append('publishNow', String(publishNow));
+    
     try {
       await schedulePost(formData);
       (e.target as HTMLFormElement).reset();
-      alert(t('scheduler.success_alert'));
-    } catch (error: unknown) {
-      alert((error as Error).message);
+      setPublishNow(false);
+      alert(t('scheduler.success_alert') || '¡Acción realizada con éxito!');
+    } catch (error: any) {
+      alert(error.message);
     } finally {
       setLoading(false);
     }
@@ -43,6 +47,20 @@ export function SchedulerForm({ pages }: SchedulerFormProps) {
             placeholder={t('scheduler.content_placeholder')}
           />
         </div>
+        
+        <div className="flex items-center gap-3 p-3 bg-neutral-50 dark:bg-neutral-800/50 rounded-lg border border-neutral-100 dark:border-neutral-800">
+          <input 
+            type="checkbox" 
+            id="publishNow"
+            checked={publishNow}
+            onChange={(e) => setPublishNow(e.target.checked)}
+            className="h-4 w-4 rounded border-neutral-300 text-blue-600 focus:ring-blue-500"
+          />
+          <label htmlFor="publishNow" className="text-sm font-medium text-neutral-900 dark:text-neutral-100 cursor-pointer select-none">
+            {t('scheduler.publish_now') || 'Subir ahora mismo a Facebook'}
+          </label>
+        </div>
+
         <div className="grid grid-cols-1 gap-4">
           <div>
              <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">{t('scheduler.page_label')}</label>
@@ -58,28 +76,27 @@ export function SchedulerForm({ pages }: SchedulerFormProps) {
                  </option>
                ))}
              </select>
-             {pages.length === 0 && (
-               <p className="text-xs text-red-500 mt-1">
-                 {t('scheduler.no_pages_error')}
-               </p>
-             )}
           </div>
-          <div>
-             <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">{t('scheduler.date_label')}</label>
-             <input 
-               type="datetime-local" 
-               name="scheduledAt" 
-               required 
-               className="w-full border border-neutral-300 dark:border-white/10 rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white dark:bg-neutral-950 dark:text-white" 
-             />
-          </div>
+          
+          {!publishNow && (
+            <div className="animate-in fade-in slide-in-from-top-2 duration-200">
+               <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">{t('scheduler.date_label')}</label>
+               <input 
+                 type="datetime-local" 
+                 name="scheduledAt" 
+                 required={!publishNow}
+                 className="w-full border border-neutral-300 dark:border-white/10 rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white dark:bg-neutral-950 dark:text-white" 
+               />
+            </div>
+          )}
         </div>
+        
         <Button 
           type="submit" 
           disabled={loading || pages.length === 0}
-          className="w-full"
+          className={`w-full ${publishNow ? 'bg-blue-600 hover:bg-blue-700' : ''}`}
         >
-          {loading ? t('scheduler.button_loading') : t('scheduler.button_idle')}
+          {loading ? t('scheduler.button_loading') : (publishNow ? (t('scheduler.button_publish') || 'Publicar Ahora') : t('scheduler.button_idle'))}
         </Button>
       </form>
     </div>

@@ -70,6 +70,8 @@ export class ScheduledPostRepository {
     scheduled_for: string;
     media_url?: string;
     ai_generated?: boolean;
+    status?: 'pending' | 'published' | 'failed';
+    facebook_post_id?: string;
   }): Promise<{ success: boolean; error?: string; data?: ScheduledPost }> {
     const supabase = await createClient();
 
@@ -77,7 +79,7 @@ export class ScheduledPostRepository {
       .from('scheduled_posts')
       .insert({
         ...data,
-        status: 'pending'
+        status: data.status || 'pending'
       })
       .select()
       .single();
