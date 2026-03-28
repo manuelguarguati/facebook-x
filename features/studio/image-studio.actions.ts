@@ -2,7 +2,15 @@
 
 import { createClient } from '@/lib/supabase/server';
 
-export async function generateImageAction(prompt: string, aspectRatio: string = "1:1") {
+export interface StudioImageResponse {
+  success: boolean;
+  imageBase64?: string;
+  mimeType?: string;
+  text?: string;
+  error?: string;
+}
+
+export async function generateImageAction(prompt: string, aspectRatio: string = "1:1"): Promise<StudioImageResponse> {
   const supabase = await createClient();
   const { data: userData } = await supabase.auth.getUser();
   if (!userData?.user) throw new Error('No autenticado');
@@ -22,7 +30,7 @@ export async function generateImageAction(prompt: string, aspectRatio: string = 
     // Using native HTTPS to bypass any fetch middleware/overrides that might cause 401
     const https = require('https');
     
-    return new Promise((resolve) => {
+    return new Promise<StudioImageResponse>((resolve) => {
       https.get(imageUrl, (res: any) => {
         if (res.statusCode !== 200) {
           let body = '';
@@ -54,7 +62,7 @@ export async function generateImageAction(prompt: string, aspectRatio: string = 
   }
 }
 
-export async function editImageAction(prompt: string, imageBase64: string, mimeType: string) {
+export async function editImageAction(prompt: string, imageBase64: string, mimeType: string): Promise<StudioImageResponse> {
   // Pivot: Editing via IA usually requires more complex tools. 
   // For now, we will use the same Pollinations engine but focus on the 'edit' prompt logic.
   // Real image-to-image usually needs a different endpoint.
