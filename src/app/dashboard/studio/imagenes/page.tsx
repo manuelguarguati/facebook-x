@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { ImageIcon, Wand2, Loader2, Download, Send, Upload, X, Sparkles, CalendarClock, Edit3 } from 'lucide-react';
+import { ImageIcon, Wand2, Loader2, Download, Send, Upload, X, Sparkles, CalendarClock, Edit3, AlertCircle } from 'lucide-react';
 import { generateImageAction, editImageAction } from '@/features/studio/image-studio.actions';
 import { getPagesAction, saveScheduledPostAction } from '@/features/studio/ai-studio.actions';
 import { schedulePost } from '@/features/scheduler/actions';
@@ -44,6 +44,8 @@ export default function ImageStudioPage() {
   const [postContent, setPostContent] = useState('');
   const [scheduling, setScheduling] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [history, setHistory] = useState<{base64: string, mime: string, prompt: string}[]>([]);
   const router = useRouter();
 
   useEffect(() => {
@@ -65,13 +67,17 @@ export default function ImageStudioPage() {
     if (!prompt.trim()) return;
     setLoading(true);
     setGeneratedImage(null);
-    const result = await generateImageAction(buildFinalPrompt(), aspectRatio);
+    const finalPrompt = buildFinalPrompt();
+    const result = await generateImageAction(finalPrompt, aspectRatio);
     if (result.success && result.imageBase64) {
-      setGeneratedImage(result.imageBase64);
-      setGeneratedMime(result.mimeType || 'image/png');
+      const newImg = result.imageBase64;
+      const newMime = result.mimeType || 'image/png';
+      setGeneratedImage(newImg);
+      setGeneratedMime(newMime);
+      setHistory(prev => [{base64: newImg, mime: newMime, prompt: finalPrompt}, ...prev].slice(0, 6));
       if (result.text) setPostContent(result.text);
     } else {
-      alert(result.error || 'Error al generar imagen');
+      setError(result.error || 'Error al generar imagen');
     }
     setLoading(false);
   };
@@ -81,10 +87,13 @@ export default function ImageStudioPage() {
     setLoading(true);
     const result = await editImageAction(editPrompt, uploadedImage, uploadedMime);
     if (result.success && result.imageBase64) {
-      setGeneratedImage(result.imageBase64);
-      setGeneratedMime(result.mimeType || 'image/png');
+      const newImg = result.imageBase64;
+      const newMime = result.mimeType || 'image/png';
+      setGeneratedImage(newImg);
+      setGeneratedMime(newMime);
+      setHistory(prev => [{base64: newImg, mime: newMime, prompt: editPrompt}, ...prev].slice(0, 6));
     } else {
-      alert(result.error || 'Error al editar imagen');
+      setError(result.error || 'Error al editar imagen');
     }
     setLoading(false);
   };
@@ -141,7 +150,7 @@ export default function ImageStudioPage() {
     if (result.success) {
       router.push('/dashboard/schedule');
     } else {
-      alert(result.error || 'Error al programar');
+      setError(result.error || 'Error al programar');
       setScheduling(false);
     }
   };
@@ -158,13 +167,13 @@ export default function ImageStudioPage() {
       {/* Mode Toggle */}
       <div className="flex gap-2 p-1 bg-neutral-900 rounded-xl w-fit border border-white/5">
         <button
-          onClick={() => setMode('generate')}
+          onClick={() => { setMode('generate'); setGeneratedImage(null); setUploadedImage(null); setError(null); }}
           className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition-all ${mode === 'generate' ? 'bg-purple-600 text-white shadow-lg' : 'text-neutral-400 hover:text-white'}`}
         >
           <Wand2 className="w-4 h-4" /> Generar
         </button>
         <button
-          onClick={() => setMode('edit')}
+          onClick={() => { setMode('edit'); setGeneratedImage(null); setError(null); }}
           className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition-all ${mode === 'edit' ? 'bg-purple-600 text-white shadow-lg' : 'text-neutral-400 hover:text-white'}`}
         >
           <Edit3 className="w-4 h-4" /> Editar imagen
@@ -184,10 +193,11 @@ export default function ImageStudioPage() {
                 <CardContent className="space-y-4">
                   <textarea
                     value={prompt}
-                    onChange={(e) => setPrompt(e.target.value)}
+                    onChange={(e) => { setPrompt(e.target.value); setError(null); }}
                     placeholder="Ej: Una taza de café en una mesa de madera, luz natural suave, estilo fotorrealista..."
                     className="w-full bg-neutral-900 border border-white/10 rounded-xl p-3 text-sm text-white placeholder:text-neutral-600 focus:border-purple-500 outline-none transition-all min-h-[120px] resize-none"
                   />
+                  <p className="text-[10px] text-neutral-600 text-right mt-1">{prompt.length}/500 caracteres</p>
 
                   <div>
                     <label className="text-xs text-neutral-500 uppercase font-bold block mb-2">Estilo</label>
@@ -295,18 +305,33 @@ export default function ImageStudioPage() {
                 <CardDescription className="text-neutral-500">La imagen generada aparecerá aquí</CardDescription>
               </div>
               {generatedImage && (
-                <Button variant="outline" size="sm" onClick={handleDownload} className="border-white/10 text-neutral-400 hover:bg-white/5">
-                  <Download className="w-4 h-4 mr-2" /> Descargar
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setUploadedImage(generatedImage);
+                      setUploadedMime(generatedMime);
+                      setMode('edit');
+                      setGeneratedImage(null);
+                    }}
+                    className="border-purple-500/30 text-purple-400 hover:bg-purple-500/10"
+                  >
+                    <Edit3 className="w-4 h-4 mr-2" /> Usar como base para editar
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={handleDownload} className="border-white/10 text-neutral-400 hover:bg-white/5">
+                    <Download className="w-4 h-4 mr-2" /> Descargar
+                  </Button>
+                </div>
               )}
             </CardHeader>
             <CardContent className="flex-1 flex flex-col items-center justify-center p-6 gap-6">
               {loading ? (
-                <div className="flex flex-col items-center gap-4 text-neutral-500">
-                  <div className="w-16 h-16 rounded-2xl bg-purple-500/10 flex items-center justify-center">
-                    <Loader2 className="w-8 h-8 text-purple-500 animate-spin" />
-                  </div>
-                  <p className="text-sm">Generando tu imagen con IA...</p>
+                <div className="w-full space-y-3 animate-pulse">
+                  <div className="w-full h-64 bg-neutral-800 rounded-2xl" />
+                  <div className="h-4 bg-neutral-800 rounded w-3/4" />
+                  <div className="h-4 bg-neutral-800 rounded w-1/2" />
+                  <p className="text-center text-sm text-purple-400 mt-4">✨ Generando tu imagen con IA...</p>
                 </div>
               ) : generatedImage ? (
                 <div className="w-full space-y-4">
@@ -370,9 +395,35 @@ export default function ImageStudioPage() {
                   <div className="w-20 h-20 rounded-2xl bg-white/5 flex items-center justify-center">
                     <ImageIcon className="w-10 h-10" />
                   </div>
-                  <p className="text-sm text-center max-w-[200px]">
-                    {mode === 'generate' ? 'Describe tu imagen y haz clic en Generar' : 'Sube una imagen y escribe cómo editarla'}
-                  </p>
+                  {error ? (
+                    <div className="w-full p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm flex items-start gap-2">
+                      <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                      <span>{error}</span>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-center max-w-[200px]">
+                      {mode === 'generate' ? 'Describe tu imagen y haz clic en Generar' : 'Sube una imagen y escribe cómo editarla'}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* Session History */}
+              {history.length > 1 && (
+                <div className="w-full mt-4 pt-4 border-t border-white/5">
+                  <p className="text-xs text-neutral-500 uppercase font-bold mb-3">Generadas anteriormente</p>
+                  <div className="flex gap-2 flex-wrap">
+                    {history.slice(1).map((item, i) => (
+                      <img
+                        key={i}
+                        src={`data:${item.mime};base64,${item.base64}`}
+                        alt={item.prompt}
+                        title={item.prompt}
+                        onClick={() => { setGeneratedImage(item.base64); setGeneratedMime(item.mime); setError(null); }}
+                        className="w-16 h-16 object-cover rounded-lg border border-white/10 cursor-pointer hover:border-purple-500 transition-all hover:scale-105"
+                      />
+                    ))}
+                  </div>
                 </div>
               )}
             </CardContent>
