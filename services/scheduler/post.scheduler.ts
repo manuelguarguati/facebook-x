@@ -15,15 +15,18 @@ export class PostScheduler {
         }
 
         const platformPostId = await this.fbService.publishPost(
-          post.pages.facebook_page_id, 
-          post.content, 
+          post.pages.facebook_page_id,
+          post.content,
           post.pages.access_token
         );
-        
-        await this.postRepo.updatePostStatus(post.id, 'published', platformPostId);
-      } catch (error) {
-        await this.postRepo.updatePostStatus(post.id, 'failed', undefined, String(error));
+
+        console.log(`[Scheduler] Published post ${post.id} → FB id: ${platformPostId}`);
+        await this.postRepo.updatePostStatus(post.id, 'published', { facebook_post_id: platformPostId });
+      } catch (error: any) {
+        console.error(`[Scheduler] Failed to publish post ${post.id}:`, error);
+        await this.postRepo.updatePostStatus(post.id, 'failed', { error_message: error.message });
       }
     }
   }
 }
+

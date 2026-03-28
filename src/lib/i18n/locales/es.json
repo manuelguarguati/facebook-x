@@ -132,6 +132,9 @@
     "manual_error": "Error al conectar la página manualmente",
     "oauth_disclaimer": "Al conectar, TECHUS obtendrá permiso para leer tus páginas y publicar contenido programado por ti.",
     "manual_help_question": "¿No sabes cómo obtener estos datos?",
-    "manual_help_link": "Ver guía oficial"
+    "manual_help_link": "Ver guía oficial",
+    "disconnect_button": "Desconectar Cuenta de Facebook",
+    "disconnect_confirm": "¿Estás seguro de que quieres desconectar tu cuenta de Facebook? Se eliminarán todas las páginas y estadísticas asociadas.",
+    "disconnecting": "Desconectando..."
   }
 }

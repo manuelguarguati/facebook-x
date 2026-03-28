@@ -7,15 +7,33 @@ import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { RefreshCw, Trash2, Users, Heart, AlertCircle } from 'lucide-react';
 import { deletePage } from '@/features/scheduler/actions';
-import { refreshSinglePageStats } from '@/features/pages/actions';
-import { useSearchParams } from 'next/navigation';
+import { refreshSinglePageStats, disconnectFacebookAction } from '@/features/pages/actions';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function PagesContent({ pages }: { pages: any[] }) {
   const { t } = useTranslation();
   const searchParams = useSearchParams();
+  const router = useRouter();
   const error = searchParams.get('error');
+  const [isDisconnecting, setIsDisconnecting] = useState(false);
+
+  const handleDisconnect = async () => {
+    if (!window.confirm(t('pages.disconnect_confirm') || 'Are you sure?')) return;
+    
+    setIsDisconnecting(true);
+    try {
+        await disconnectFacebookAction();
+        router.push('/dashboard');
+    } catch (err) {
+        console.error('Failed to disconnect:', err);
+        alert('Error al desconectar la cuenta');
+    } finally {
+        setIsDisconnecting(false);
+    }
+  };
 
   return (
     <div className="max-w-7xl mx-auto space-y-8">
@@ -34,6 +52,17 @@ export function PagesContent({ pages }: { pages: any[] }) {
             {t('pages.subtitle')}
           </p>
         </div>
+        {pages.length > 0 && (
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="text-red-500 border-red-200 hover:bg-red-50 dark:border-red-900/50 dark:hover:bg-red-900/20"
+            onClick={handleDisconnect}
+            disabled={isDisconnecting}
+          >
+            {isDisconnecting ? t('pages.disconnecting') : t('pages.disconnect_button')}
+          </Button>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

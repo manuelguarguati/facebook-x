@@ -9,6 +9,7 @@ export interface ManagedPage {
   followers_count: number;
   fans_count: number;
   created_at?: string;
+  updated_at?: string;
 }
 
 export class PageRepository {
@@ -49,5 +50,38 @@ export class PageRepository {
       .from('pages')
       .delete()
       .eq('id', id);
+  }
+
+  async getTotalFollowers(userId: string): Promise<number> {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from('pages')
+      .select('followers_count')
+      .eq('user_id', userId);
+
+    if (error || !data) return 0;
+    return data.reduce((sum, p) => sum + (p.followers_count || 0), 0);
+  }
+
+  async getTotalFans(userId: string): Promise<number> {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from('pages')
+      .select('fans_count')
+      .eq('user_id', userId);
+
+    if (error || !data) return 0;
+    return data.reduce((sum, p) => sum + (p.fans_count || 0), 0);
+  }
+
+  async getPageCount(userId: string): Promise<number> {
+    const supabase = await createClient();
+    const { count, error } = await supabase
+      .from('pages')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userId);
+
+    if (error) return 0;
+    return count || 0;
   }
 }

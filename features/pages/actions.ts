@@ -3,7 +3,8 @@
 import { createClient } from '@/lib/supabase/server';
 import { PageRepository } from '@/repositories/page.repository';
 import { StatsRepository } from '@/repositories/stats.repository';
-import { revalidatePath } from 'next/cache';
+import { ConnectionRepository } from '@/repositories/connection.repository';
+import { revalidatePath, revalidateTag } from 'next/cache';
 
 export async function syncFacebookPagesAction() {
   const supabase = await createClient();
@@ -25,9 +26,19 @@ export async function syncFacebookPagesAction() {
     throw new Error(errorData.error?.message || 'Failed to fetch Facebook pages');
   }
 
-  const { data: fbPages } = await response.json();
+  const fbData = await response.json();
+  const fbPages = fbData.data || [];
   const pageRepo = new PageRepository();
   const statsRepo = new StatsRepository();
+  const connectionRepo = new ConnectionRepository();
+
+  // 2.5 Persist the main connection
+  console.log(`DEBUG [SyncAction]: Persisting main user connection...`);
+  await connectionRepo.upsertConnection({
+    user_id: session.user.id,
+    facebook_user_id: session.user.identities?.find(i => i.provider === 'facebook')?.id || session.user.id,
+    access_token: providerToken,
+  });
 
   // 3. Save each page and record snapshot stats
   console.log(`DEBUG [SyncAction]: Syncing ${fbPages.length} pages...`);
@@ -57,8 +68,8 @@ export async function syncFacebookPagesAction() {
     }
   }
 
-  revalidatePath('/dashboard/pages');
-  revalidatePath('/dashboard/schedule');
+  revalidatePath('/dashboard/pages', 'page');
+  revalidatePath('/dashboard/schedule', 'page');
   
   return { success: true, count: fbPages.length };
 }
@@ -100,7 +111,7 @@ export async function refreshSinglePageStats(pageId: string, facebookPageId: str
         recorded_at: new Date().toISOString()
     });
 
-    revalidatePath('/dashboard/pages');
+    revalidatePath('/dashboard/pages', 'page');
 }
 
 export async function connectManualPageAction(pageId: string, accessToken: string) {
@@ -166,8 +177,32 @@ export async function connectManualPageAction(pageId: string, accessToken: strin
         });
     }
 
-    revalidatePath('/dashboard/pages');
-    revalidatePath('/dashboard/schedule');
+    revalidatePath('/dashboard/pages', 'page');
+    revalidatePath('/dashboard/schedule', 'page');
 
     return { success: true, name: fbPage.name };
+}
+
+export async function disconnectFacebookAction() {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Not authenticated');
+
+    const connectionRepo = new ConnectionRepository();
+    const pageRepo = new PageRepository();
+
+    // 1. Delete all user pages (this will cascade delete stats if FK is set to cascade)
+    const userPages = await pageRepo.getUserPages(user.id);
+    for (const page of userPages) {
+        await pageRepo.deletePage(page.id);
+    }
+
+    // 2. Delete the main connection
+    await connectionRepo.deleteConnection(user.id);
+
+    // 3. Clear cache and direct to refresh
+    revalidatePath('/dashboard', 'layout');
+    revalidateTag('user_pages');
+
+    return { success: true };
 }

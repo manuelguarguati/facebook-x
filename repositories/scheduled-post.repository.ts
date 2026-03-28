@@ -8,9 +8,11 @@ export interface ScheduledPost {
   scheduled_for: string;
   status: 'pending' | 'published' | 'failed';
   ai_generated: boolean;
+  facebook_post_id?: string; // ID of the post after publication
+  error_message?: string;   // Log if publication fails
   created_at: string;
-  facebook_post_id?: string;
-  error_message?: string;
+  updated_at?: string;
+  // Joined relation (not a real column)
   pages?: {
     facebook_page_id: string;
     access_token?: string;
@@ -40,6 +42,26 @@ export class ScheduledPostRepository {
 
     if (error) return 0;
     return count || 0;
+  }
+
+  async getUserPostCounts(userId: string): Promise<{ total: number; pending: number; published: number }> {
+    const supabase = await createClient();
+
+    const { data, error } = await supabase
+      .from('scheduled_posts')
+      .select(`
+        status,
+        pages!inner ( user_id )
+      `)
+      .eq('pages.user_id', userId);
+
+    if (error || !data) return { total: 0, pending: 0, published: 0 };
+
+    const total = data.length;
+    const pending = data.filter(p => p.status === 'pending').length;
+    const published = data.filter(p => p.status === 'published').length;
+
+    return { total, pending, published };
   }
 
   async scheduleNewPost(data: {
@@ -99,14 +121,18 @@ export class ScheduledPostRepository {
     return data || [];
   }
 
-  async updatePostStatus(id: string, status: string, facebookPostId?: string, errorMessage?: string): Promise<void> {
+  async updatePostStatus(
+    id: string, 
+    status: 'published' | 'failed', 
+    metadata?: { facebook_post_id?: string; error_message?: string }
+  ): Promise<void> {
     const supabase = await createClient();
     await supabase
       .from('scheduled_posts')
-      .update({
+      .update({ 
         status,
-        facebook_post_id: facebookPostId,
-        error_message: errorMessage
+        ...metadata,
+        updated_at: new Date().toISOString()
       })
       .eq('id', id);
   }

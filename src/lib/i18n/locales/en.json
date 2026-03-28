@@ -130,6 +130,9 @@
     "manual_error": "Error connecting page manually",
     "oauth_disclaimer": "By connecting, TECHUS will obtain permission to read your pages and publish content scheduled by you.",
     "manual_help_question": "Don't know how to get this data?",
-    "manual_help_link": "See official guide"
+    "manual_help_link": "See official guide",
+    "disconnect_button": "Disconnect Facebook Account",
+    "disconnect_confirm": "Are you sure you want to disconnect your Facebook account? All associated pages and stats will be removed.",
+    "disconnecting": "Disconnecting..."
   }
 }
