@@ -19,14 +19,18 @@ export async function generateImageAction(prompt: string, aspectRatio: string = 
     const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${width}&height=${height}&nologo=true&enhance=true&seed=${Date.now()}`;
 
     const imageResponse = await fetch(imageUrl);
-    if (!imageResponse.ok) throw new Error('Error al generar imagen');
+    if (!imageResponse.ok) {
+      const errorText = await imageResponse.text().catch(() => 'Sin detalles');
+      throw new Error(`Error de API (${imageResponse.status}): ${errorText.substring(0, 50)}`);
+    }
 
     const arrayBuffer = await imageResponse.arrayBuffer();
     const base64 = Buffer.from(arrayBuffer).toString('base64');
 
     return { success: true, imageBase64: base64, mimeType: 'image/jpeg', text: '' };
   } catch (error: any) {
-    return { success: false, error: error.message };
+    console.error('IMAGE_GEN_DETAILED_ERROR:', error);
+    return { success: false, error: `Fallo: ${error.message}` };
   }
 }
 
