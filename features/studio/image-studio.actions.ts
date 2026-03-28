@@ -7,50 +7,25 @@ export async function generateImageAction(prompt: string, aspectRatio: string = 
   const { data: userData } = await supabase.auth.getUser();
   if (!userData?.user) throw new Error('No autenticado');
 
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) throw new Error('GEMINI_API_KEY no configurada');
-
   try {
-    // Using current experimental Gemini 2.0 Flash Image Generation endpoint
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image-preview:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: `${prompt} (Aspect Ratio: ${aspectRatio})` }] }],
-          generationConfig: { 
-            responseModalities: ["TEXT", "IMAGE"] 
-          },
-        }),
-      }
-    );
+    const dimensions: Record<string, { width: number; height: number }> = {
+      "1:1": { width: 1024, height: 1024 },
+      "4:5": { width: 896, height: 1152 },
+      "16:9": { width: 1344, height: 768 },
+      "9:16": { width: 768, height: 1344 },
+    };
+    const { width, height } = dimensions[aspectRatio] || dimensions["1:1"];
+    const encodedPrompt = encodeURIComponent(prompt);
+    const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${width}&height=${height}&nologo=true&enhance=true&seed=${Date.now()}`;
 
-    if (!response.ok) {
-      const err = await response.json();
-      throw new Error(err.error?.message || 'Error al generar imagen');
-    }
+    const imageResponse = await fetch(imageUrl);
+    if (!imageResponse.ok) throw new Error('Error al generar imagen');
 
-    const data = await response.json();
-    const parts = data.candidates?.[0]?.content?.parts || [];
+    const arrayBuffer = await imageResponse.arrayBuffer();
+    const base64 = Buffer.from(arrayBuffer).toString('base64');
 
-    let imageBase64 = '';
-    let mimeType = 'image/png';
-    let text = '';
-
-    for (const part of parts) {
-      if (part.inlineData) {
-        imageBase64 = part.inlineData.data;
-        mimeType = part.inlineData.mimeType || 'image/png';
-      }
-      if (part.text) text = part.text;
-    }
-
-    if (!imageBase64) throw new Error('No se generó ninguna imagen');
-
-    return { success: true, imageBase64, mimeType, text };
+    return { success: true, imageBase64: base64, mimeType: 'image/jpeg', text: '' };
   } catch (error: any) {
-    console.error('Image Generation Error:', error);
     return { success: false, error: error.message };
   }
 }
