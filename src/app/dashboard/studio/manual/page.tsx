@@ -9,6 +9,8 @@ import { useRouter } from 'next/navigation';
 import { getPagesAction, saveScheduledPostAction, analyzeImageAction } from '@/features/studio/ai-studio.actions';
 import { ManagedPage } from '@/repositories/page.repository';
 import { createClient } from '@/lib/supabase/client';
+import { schedulePost } from '@/features/scheduler/actions';
+import { CalendarClock } from 'lucide-react';
 
 export default function ManualStudioPage() {
   const [content, setContent] = useState('');
@@ -123,6 +125,50 @@ export default function ManualStudioPage() {
       alert(result.error || "Error al enviar al programador");
     }
     setScheduling(false);
+  };
+
+  const handleDirectPublish = async () => {
+    if (!content || !selectedPageId) return;
+    
+    setScheduling(true);
+    let mediaUrl = undefined;
+
+    // Upload image if present (reuse logic)
+    if (imageFile) {
+      try {
+        const supabase = createClient();
+        const fileExt = imageFile.name.split('.').pop();
+        const fileName = `${Math.random()}.${fileExt}`;
+        const filePath = `manual-studio/${fileName}`;
+        const { error: uploadError } = await supabase.storage.from('posts').upload(filePath, imageFile);
+        if (!uploadError) {
+          const { data: { publicUrl } } = supabase.storage.from('posts').getPublicUrl(filePath);
+          mediaUrl = publicUrl;
+        }
+      } catch (e) { console.error(e); }
+    }
+
+    const formData = new FormData();
+    formData.append('content', content);
+    formData.append('pageId', selectedPageId);
+    formData.append('publishNow', 'true');
+    if (mediaUrl) formData.append('mediaUrl', mediaUrl);
+
+    try {
+      const res = await schedulePost(formData);
+      if (res.success) {
+        alert("¡Publicado con éxito en Facebook!");
+        setContent('');
+        setImageFile(null);
+        setImagePreview(null);
+      } else {
+        alert(res.error || "Error al publicar");
+      }
+    } catch (error: any) {
+      alert(error.message || "Error al publicar");
+    } finally {
+      setScheduling(false);
+    }
   };
 
   return (
@@ -250,14 +296,26 @@ export default function ManualStudioPage() {
                   <div className="text-[10px] text-neutral-600 font-mono">
                     {content.length} caracteres
                   </div>
-                  <Button 
-                    onClick={handleSchedule}
-                    disabled={!content || !selectedPageId || scheduling}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-8 h-12 rounded-xl font-bold shadow-lg shadow-blue-500/20 active:scale-95 transition-all"
-                  >
-                    {scheduling ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Send className="w-4 h-4 mr-2" />}
-                    {scheduling ? "Programando..." : "Programar publicación"}
-                  </Button>
+                  <div className="flex gap-3">
+                    <Button 
+                      onClick={handleDirectPublish}
+                      disabled={!content || !selectedPageId || scheduling}
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-8 h-12 rounded-xl font-bold shadow-lg shadow-blue-500/20 active:scale-95 transition-all flex items-center gap-2"
+                    >
+                      {scheduling ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                      {scheduling ? "Publicando..." : "Publicar de una vez"}
+                    </Button>
+                    
+                    <Button 
+                      onClick={handleSchedule}
+                      disabled={!content || !selectedPageId || scheduling}
+                      variant="outline"
+                      className="border-neutral-700 text-neutral-400 hover:bg-white/5 px-6 h-12 rounded-xl font-bold transition-all flex items-center gap-2"
+                    >
+                      <CalendarClock className="w-4 h-4" />
+                      Programar
+                    </Button>
+                  </div>
                 </div>
               </div>
             </CardContent>

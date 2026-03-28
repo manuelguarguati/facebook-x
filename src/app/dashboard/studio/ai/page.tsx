@@ -5,11 +5,12 @@ import { ContentTypeSelector } from '@/components/studio/ContentTypeSelector';
 import { generatePost, generateHashtags, generateVideoIdeas, getPagesAction, saveScheduledPostAction } from '@/features/studio/ai-studio.actions';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { Sparkles, Hash, Video, Copy, Send, Loader2, Wand2, CheckCircle2 } from 'lucide-react';
+import { Sparkles, Hash, Video, Copy, Send, Loader2, Wand2, CheckCircle2, CalendarClock } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 // Unused import removed
 import { ManagedPage } from '@/repositories/page.repository';
+import { schedulePost } from '@/features/scheduler/actions';
 
 export default function AiStudioPage() {
   const [loading, setLoading] = useState(false);
@@ -114,6 +115,30 @@ export default function AiStudioPage() {
       alert(result.error || "Error al enviar al programador");
     }
     setScheduling(false);
+  };
+
+  const handleDirectPublish = async () => {
+    if (!generatedContent || !selectedPageId) return;
+    
+    setScheduling(true);
+    const formData = new FormData();
+    formData.append('content', generatedContent);
+    formData.append('pageId', selectedPageId);
+    formData.append('publishNow', 'true');
+
+    try {
+      const res = await schedulePost(formData);
+      if (res.success) {
+        setSuccess(true);
+        setTimeout(() => setSuccess(false), 5000);
+      } else {
+        alert(res.error || "Error al publicar");
+      }
+    } catch (error: any) {
+      alert(error.message || "Error al publicar");
+    } finally {
+      setScheduling(false);
+    }
   };
 
   return (
@@ -275,12 +300,22 @@ export default function AiStudioPage() {
                     </span>
                   )}
                   <Button 
-                    onClick={handleSendToScheduler}
+                    onClick={handleDirectPublish}
                     disabled={!generatedContent || !selectedPageId || scheduling}
-                    className="bg-green-600 hover:bg-green-700 text-white rounded-lg flex items-center gap-2"
+                    className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center gap-2"
                   >
                     {scheduling ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                    {scheduling ? "Enviando..." : "Enviar al Programador"}
+                    {scheduling ? "Publicando..." : "Publicar de una vez"}
+                  </Button>
+
+                  <Button 
+                    onClick={handleSendToScheduler}
+                    disabled={!generatedContent || !selectedPageId || scheduling}
+                    variant="outline"
+                    className="border-green-600 text-green-600 hover:bg-green-50 rounded-lg flex items-center gap-2"
+                  >
+                    <CalendarClock className="w-4 h-4" />
+                    Programar
                   </Button>
                 </div>
               </div>

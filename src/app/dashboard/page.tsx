@@ -10,7 +10,7 @@ export default async function DashboardPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  const [recentIdeas, profile] = await Promise.all([
+    const [recentIdeas, profile] = await Promise.all([
     new AiIdeaRepository().getRecentIdeas(),
     user ? new UserRepository().getUserProfile(user.id) : null,
   ]);
@@ -22,6 +22,7 @@ export default async function DashboardPage() {
   let pendingPosts = 0;
   let totalPublishedPosts = 0;
   let totalEngagement = 0;
+  let userPages: any[] = [];
 
   if (user) {
     const pageRepo = new PageRepository();
@@ -31,14 +32,15 @@ export default async function DashboardPage() {
     const [followers, fans, pages, postCounts, postStats] = await Promise.all([
       pageRepo.getTotalFollowers(user.id),
       pageRepo.getTotalFans(user.id),
-      pageRepo.getPageCount(user.id),
+      pageRepo.getUserPages(user.id), // Changed from pageCount to full list
       postRepo.getUserPostCounts(user.id),
       publishedRepo.getUserPostStats(user.id),
     ]);
 
     totalFollowers = followers;
     totalFans = fans;
-    pageCount = pages;
+    userPages = pages;
+    pageCount = pages.length;
     pendingPosts = postCounts.pending;
     totalPublishedPosts = postStats.totalPosts;
     totalEngagement = postStats.totalEngagement;
@@ -50,6 +52,7 @@ export default async function DashboardPage() {
       userName={profile?.name || user?.user_metadata?.name || 'User'}
       userAvatar={profile?.avatar_url || user?.user_metadata?.avatar_url}
       recentIdeas={recentIdeas}
+      pages={userPages}
       stats={{
         totalFollowers,
         totalFans,

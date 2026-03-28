@@ -3,13 +3,22 @@
 import { useState } from 'react';
 import { generateIdea } from '../actions';
 import { useTranslation } from '@/src/lib/i18n/LanguageContext';
-import { CalendarClock, CheckCircle2 } from 'lucide-react';
+import { CalendarClock, CheckCircle2, Send, Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import { schedulePost } from '../../scheduler/actions';
+import { ManagedPage } from '@/repositories/page.repository';
 
-export function AiGenerator() {
+interface AiGeneratorProps {
+  pages?: ManagedPage[];
+}
+
+export function AiGenerator({ pages = [] }: AiGeneratorProps) {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
+  const [publishing, setPublishing] = useState(false);
   const [result, setResult] = useState<string | null>(null);
+  const [selectedPageId, setSelectedPageId] = useState<string>(pages[0]?.id || '');
+  const [published, setPublished] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -18,11 +27,38 @@ export function AiGenerator() {
     const formData = new FormData(e.currentTarget);
     try {
       const res = await generateIdea(formData);
-      if (res.success && res.content) setResult(res.content);
+      if (res.success && res.content) {
+        setResult(res.content);
+        setPublished(false);
+      }
     } catch (error: any) {
       alert(error.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDirectPublish = async () => {
+    if (!result || !selectedPageId) return;
+    
+    setPublishing(true);
+    const formData = new FormData();
+    formData.append('content', result);
+    formData.append('pageId', selectedPageId);
+    formData.append('publishNow', 'true');
+
+    try {
+      const res = await schedulePost(formData);
+      if (res.success) {
+        setPublished(true);
+        setTimeout(() => setPublished(false), 5000);
+      } else {
+        alert(res.error);
+      }
+    } catch (error: any) {
+      alert(error.message || 'Error al publicar');
+    } finally {
+      setPublishing(false);
     }
   };
 
@@ -56,19 +92,47 @@ export function AiGenerator() {
               <CheckCircle2 className="h-4 w-4 text-green-500" />
               {t('generator.result_title')}
             </h4>
+            {published && (
+              <span className="text-[10px] font-bold text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/30 px-2 py-0.5 rounded-full animate-bounce">
+                ¡Publicado!
+              </span>
+            )}
           </div>
           <p className="text-xs sm:text-sm text-blue-800 dark:text-blue-400 whitespace-pre-wrap leading-relaxed">
             {result}
           </p>
           
-          <div className="pt-2">
-            <Link 
-              href={`/dashboard/schedule?content=${encodeURIComponent(result)}`}
-              className="inline-flex w-full items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-semibold py-2.5 rounded-lg transition-all shadow-sm hover:shadow-md active:scale-[0.98]"
-            >
-              <CalendarClock className="h-4 w-4" />
-              Programar este post
-            </Link>
+          <div className="space-y-3 pt-2">
+            {pages.length > 0 && (
+              <select
+                value={selectedPageId}
+                onChange={(e) => setSelectedPageId(e.target.value)}
+                className="w-full bg-white dark:bg-neutral-800 border border-blue-200 dark:border-blue-900/50 rounded-lg py-2 px-3 text-xs focus:ring-1 focus:ring-blue-500 focus:outline-none"
+              >
+                {pages.map(page => (
+                  <option key={page.id} value={page.id}>{page.page_name}</option>
+                ))}
+              </select>
+            )}
+
+            <div className="flex flex-col sm:flex-row gap-2">
+              <button
+                onClick={handleDirectPublish}
+                disabled={publishing || !selectedPageId}
+                className="flex-[2] inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold py-2.5 rounded-lg transition-all shadow-sm active:scale-[0.98] disabled:opacity-50"
+              >
+                {publishing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
+                Publicar de una vez
+              </button>
+              
+              <Link 
+                href={`/dashboard/schedule?content=${encodeURIComponent(result)}`}
+                className="flex-1 inline-flex items-center justify-center gap-2 bg-white dark:bg-neutral-800 border border-blue-200 dark:border-blue-900/50 text-blue-600 dark:text-blue-400 text-xs font-semibold py-2.5 rounded-lg transition-all shadow-sm active:scale-[0.98]"
+              >
+                <CalendarClock className="h-4 w-4" />
+                Programar
+              </Link>
+            </div>
           </div>
         </div>
       )}

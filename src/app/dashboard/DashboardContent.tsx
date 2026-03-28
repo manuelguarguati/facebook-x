@@ -22,6 +22,7 @@ interface DashboardContentProps {
   userAvatar?: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   recentIdeas: any[];
+  pages: any[];
   stats: DashboardStats;
 }
 
@@ -35,6 +36,7 @@ export function DashboardContent({
   userEmail,
   userName,
   recentIdeas,
+  pages,
   stats,
 }: DashboardContentProps) {
   const { t } = useTranslation();
@@ -174,7 +176,7 @@ export function DashboardContent({
           </Card>
         </div>
         <div className="lg:col-span-1">
-          <AiGenerator />
+          <AiGenerator pages={pages} />
         </div>
       </div>
     </div>
