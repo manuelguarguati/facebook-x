@@ -1,10 +1,9 @@
-'use client';
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { schedulePost } from '../actions';
 import { ManagedPage } from '@/repositories/page.repository';
 import { Button } from '@/components/ui/Button';
 import { useTranslation } from '@/src/lib/i18n/LanguageContext';
+import { useSearchParams } from 'next/navigation';
 
 interface SchedulerFormProps {
   pages: ManagedPage[];
@@ -12,8 +11,18 @@ interface SchedulerFormProps {
 
 export function SchedulerForm({ pages }: SchedulerFormProps) {
   const { t } = useTranslation();
+  const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [publishNow, setPublishNow] = useState(false);
+  const [content, setContent] = useState('');
+
+  // Auto-fill content from URL if present
+  useEffect(() => {
+    const contentParam = searchParams.get('content');
+    if (contentParam) {
+      setContent(contentParam);
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -51,7 +60,9 @@ export function SchedulerForm({ pages }: SchedulerFormProps) {
             name="content" 
             required 
             rows={4}
-            className="w-full border border-neutral-300 dark:border-white/10 rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white dark:bg-neutral-950 dark:text-white"
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            className="w-full border border-neutral-300 dark:border-white/10 rounded-lg p-2.5 sm:p-3 text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white dark:bg-neutral-950 dark:text-white"
             placeholder={t('scheduler.content_placeholder')}
           />
         </div>

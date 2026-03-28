@@ -148,7 +148,16 @@ export function DashboardContent({
                       >
                         {idea.idea}
                       </Badge>
-                      <span className="text-xs text-neutral-500">{t('dashboard.recent.just_now')}</span>
+                      <div className="flex items-center gap-4">
+                        <Link 
+                          href={`/dashboard/schedule?content=${encodeURIComponent(idea.source)}`}
+                          className="flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+                        >
+                          <CalendarClock className="h-3.5 w-3.5" />
+                          <span>Programar</span>
+                        </Link>
+                        <span className="text-xs text-neutral-500">{t('dashboard.recent.just_now')}</span>
+                      </div>
                     </div>
                     <p className="text-sm text-neutral-800 dark:text-neutral-300 line-clamp-2">
                       {idea.source}

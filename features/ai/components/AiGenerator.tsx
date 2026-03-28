@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { generateIdea } from '../actions';
 import { useTranslation } from '@/src/lib/i18n/LanguageContext';
+import { CalendarClock, CheckCircle2 } from 'lucide-react';
+import Link from 'next/link';
 
 export function AiGenerator() {
   const { t } = useTranslation();
@@ -48,9 +50,26 @@ export function AiGenerator() {
       </form>
 
       {result && (
-        <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-900/30 rounded-lg">
-          <h4 className="text-xs sm:text-sm font-medium text-blue-900 dark:text-blue-200 mb-2">{t('generator.result_title')}</h4>
-          <p className="text-xs sm:text-sm text-blue-800 dark:text-blue-300 whitespace-pre-wrap">{result}</p>
+        <div className="mt-4 sm:mt-6 p-4 sm:p-5 bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/20 rounded-xl space-y-4 animate-in fade-in zoom-in-95 duration-300">
+          <div className="flex items-center justify-between">
+            <h4 className="text-xs sm:text-sm font-semibold text-blue-900 dark:text-blue-300 flex items-center gap-2">
+              <CheckCircle2 className="h-4 w-4 text-green-500" />
+              {t('generator.result_title')}
+            </h4>
+          </div>
+          <p className="text-xs sm:text-sm text-blue-800 dark:text-blue-400 whitespace-pre-wrap leading-relaxed">
+            {result}
+          </p>
+          
+          <div className="pt-2">
+            <Link 
+              href={`/dashboard/schedule?content=${encodeURIComponent(result)}`}
+              className="inline-flex w-full items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-semibold py-2.5 rounded-lg transition-all shadow-sm hover:shadow-md active:scale-[0.98]"
+            >
+              <CalendarClock className="h-4 w-4" />
+              Programar este post
+            </Link>
+          </div>
         </div>
       )}
     </div>
