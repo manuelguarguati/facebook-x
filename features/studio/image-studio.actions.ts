@@ -42,7 +42,7 @@ export async function generateImageAction(prompt: string, aspectRatio: string = 
     const { width, height } = dimensions[aspectRatio] || dimensions["1:1"];
 
     const response = await fetch(
-      "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-3.5-large",
+      "https://router.huggingface.co/hf-inference/models/stabilityai/stable-diffusion-3.5-large",
       {
         method: "POST",
         headers: {
