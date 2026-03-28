@@ -113,6 +113,25 @@
     "followers": "Seguidores",
     "fans": "Fans",
     "sync_button_idle": "Sincronizar Páginas Facebook",
-    "sync_button_loading": "Conectando..."
+    "sync_button_loading": "Conectando...",
+    "mode_oauth_title": "Conexión Automática",
+    "mode_manual_title": "Panel Técnico (Manual)",
+    "manual_description": "Conecta una página manualmente usando su ID y un Token de Acceso técnico.",
+    "manual_id_label": "ID de la Página de Facebook",
+    "manual_id_placeholder": "Ej: 1029384756",
+    "manual_id_help": "El ID numérico único de tu página de Facebook.",
+    "manual_token_label": "Token de Acceso de la Página",
+    "manual_token_placeholder": "EAA...",
+    "manual_token_help": "Token de acceso de larga duración generado desde el panel de desarrolladores.",
+    "manual_save_button": "Guardar Conexión Manual",
+    "manual_guide_title": "Guía de Conexión Manual",
+    "manual_guide_step1": "Obtén tu **ID de Página** en la sección \"Información\" de tu página de Facebook.",
+    "manual_guide_step2": "Genera un **Token de Acceso de Página** (de larga duración) desde el <a href=\"https://developers.facebook.com/tools/explorer/\" target=\"_blank\" class=\"text-blue-600 hover:underline\">Graph API Explorer</a>.",
+    "manual_guide_step3": "Asegúrate de que el token tenga permisos: `pages_show_list`, `pages_read_engagement` y `pages_manage_posts`.",
+    "manual_success": "¡Página \"{name}\" conectada exitosamente!",
+    "manual_error": "Error al conectar la página manualmente",
+    "oauth_disclaimer": "Al conectar, TECHUS obtendrá permiso para leer tus páginas y publicar contenido programado por ti.",
+    "manual_help_question": "¿No sabes cómo obtener estos datos?",
+    "manual_help_link": "Ver guía oficial"
   }
 }
