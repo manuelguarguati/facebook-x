@@ -25,7 +25,7 @@ export async function generateImageAction(prompt: string, aspectRatio: string = 
     const { width, height } = dimensions[aspectRatio] || dimensions["1:1"];
     const encodedPrompt = encodeURIComponent(prompt);
     // Standard Pollinations URL with no parameters to ensure compatibility
-    const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?nologo=true&seed=${Date.now()}`;
+    const imageUrl = `https://gen.pollinations.ai/prompt/${encodedPrompt}?nologo=true&seed=${Date.now()}`;
 
     // Using native HTTPS to bypass any fetch middleware/overrides that might cause 401
     const https = require('https');
