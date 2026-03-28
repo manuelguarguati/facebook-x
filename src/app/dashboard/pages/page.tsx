@@ -4,9 +4,10 @@ import { PagesContent } from './PagesContent';
 
 export default async function PagesPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data, error: authError } = await supabase.auth.getUser();
+  const user = data?.user;
 
-  if (!user) return null;
+  if (authError || !user) return null;
 
   const repo = new PageRepository();
   const pages = await repo.getUserPages(user.id);

@@ -93,18 +93,24 @@ export function ManualConnectForm() {
         {loading ? t('pages.button_loading') : 'Guardar Conexión Manual'}
       </Button>
 
-      <div className="pt-2">
-        <p className="text-[11px] text-neutral-500 text-center leading-relaxed">
-          ¿No sabes cómo obtener estos datos? 
-          <a 
-            href="https://developers.facebook.com/docs/pages/access-tokens" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="text-blue-600 hover:underline ml-1"
-          >
-            Ver guía oficial
-          </a>
-        </p>
+      <div className="pt-4 border-t border-neutral-100 dark:border-neutral-800">
+        <h4 className="text-[11px] font-bold text-neutral-900 dark:text-neutral-100 uppercase tracking-wider mb-2">
+          Guía de Conexión Manual
+        </h4>
+        <ul className="space-y-2 text-[11px] text-neutral-500 text-left leading-relaxed">
+          <li className="flex gap-2">
+            <span className="font-bold text-blue-600">1.</span>
+            <span>Obtén tu <strong>ID de Página</strong> en la sección "Información" de tu página de Facebook.</span>
+          </li>
+          <li className="flex gap-2">
+            <span className="font-bold text-blue-600">2.</span>
+            <span>Genera un <strong>Token de Acceso de Página</strong> (de larga duración) desde el <a href="https://developers.facebook.com/tools/explorer/" target="_blank" className="text-blue-600 hover:underline">Graph API Explorer</a>.</span>
+          </li>
+          <li className="flex gap-2">
+            <span className="font-bold text-blue-600">3.</span>
+            <span>Asegúrate de que el token tenga permisos: <code>pages_show_list</code>, <code>pages_read_engagement</code> y <code>pages_manage_posts</code>.</span>
+          </li>
+        </ul>
       </div>
     </form>
   );

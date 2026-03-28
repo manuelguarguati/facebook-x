@@ -40,9 +40,8 @@ export const updateSession = async (request: NextRequest) => {
   );
 
   // Refresh token and get current user
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data, error: _error } = await supabase.auth.getUser();
+  const user = data?.user;
 
   const isPublicRoute = PUBLIC_ROUTES.some((route) =>
     route === "/" ? pathname === "/" : pathname.startsWith(route)
