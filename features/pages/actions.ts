@@ -9,7 +9,8 @@ export async function syncFacebookPagesAction() {
   const supabase = await createClient();
   
   // 1. Get the session to find the provider_token
-  const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+  const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+  const session = sessionData?.session;
   if (sessionError || !session) throw new Error('Not authenticated');
 
   const providerToken = session.provider_token;
@@ -63,21 +64,30 @@ export async function syncFacebookPagesAction() {
 }
 
 export async function refreshSinglePageStats(pageId: string, facebookPageId: string, pageAccessToken: string) {
-    const response = await fetch(`https://graph.facebook.com/v19.0/${facebookPageId}?access_token=${pageAccessToken}&fields=followers_count,fan_count`);
-    if (!response.ok) return;
+    // 1. Safely get the current user first
+    const supabase = await createClient();
+    const { data: userData, error: userError } = await supabase.auth.getUser();
+    const user = userData?.user;
+    if (userError || !user) {
+        console.error('[refreshSinglePageStats] Not authenticated');
+        return;
+    }
+
+    const response = await fetch(`https://graph.facebook.com/v19.0/${facebookPageId}?access_token=${pageAccessToken}&fields=id,name,followers_count,fan_count`);
+    if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        console.error('[refreshSinglePageStats] Facebook API error:', errData);
+        return;
+    }
 
     const data = await response.json();
     const pageRepo = new PageRepository();
     const statsRepo = new StatsRepository();
 
     await pageRepo.savePage({
-        // We need the full object or we might overwrite with defaults if not careful
-        // But our savePage is an upsert. 
-        // Wait, savePage Omit<ManagedPage, 'id' | 'created_at'> requires user_id etc.
-        // I should probably add a more specific updateStats method
-        user_id: (await (await createClient()).auth.getUser()).data.user!.id,
+        user_id: user.id,
         facebook_page_id: facebookPageId,
-        page_name: data.name, // Should have fetched name too if needed
+        page_name: data.name || facebookPageId,
         access_token: pageAccessToken,
         followers_count: data.followers_count || 0,
         fans_count: data.fan_count || 0,
@@ -94,42 +104,60 @@ export async function refreshSinglePageStats(pageId: string, facebookPageId: str
 }
 
 export async function connectManualPageAction(pageId: string, accessToken: string) {
-    if (!pageId || !accessToken) {
+    // Input validation
+    if (!pageId?.trim() || !accessToken?.trim()) {
         throw new Error('ID de la página y Token de acceso son requeridos');
     }
 
+    // 1. Safely get the current user
     const supabase = await createClient();
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-    if (userError || !user) throw new Error('No autenticado');
+    const { data: userData, error: userError } = await supabase.auth.getUser();
+    const user = userData?.user;
+    if (userError || !user) throw new Error('No autenticado. Por favor inicia sesión de nuevo.');
 
-    // 1. Verify token and get page details
-    const response = await fetch(`https://graph.facebook.com/v19.0/${pageId}?access_token=${accessToken}&fields=id,name,followers_count,fan_count`);
+    // 2. Verify token with Facebook Graph API and get page details
+    let fbApiResponse: Response;
+    try {
+        fbApiResponse = await fetch(
+            `https://graph.facebook.com/v19.0/${pageId.trim()}?access_token=${accessToken.trim()}&fields=id,name,followers_count,fan_count`
+        );
+    } catch (networkError) {
+        throw new Error('No se pudo conectar con Facebook. Comprueba tu conexión a internet.');
+    }
     
-    if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error?.message || 'Error al conectar con la API de Facebook. Verifique el Token e ID.');
+    const fbResponseData = await fbApiResponse.json();
+    
+    if (!fbApiResponse.ok) {
+        // Return the specific Facebook error message
+        const fbErrorMsg = fbResponseData.error?.message || 'Error al conectar con la API de Facebook.';
+        throw new Error(`Facebook: ${fbErrorMsg}`);
     }
 
-    const fbPage = await response.json();
+    // Check if we got back a page, not an error object
+    if (fbResponseData.error) {
+        throw new Error(`Facebook: ${fbResponseData.error.message}`);
+    }
+
+    const fbPage = fbResponseData;
     const pageRepo = new PageRepository();
     const statsRepo = new StatsRepository();
 
-    // 2. Save page
+    // 3. Save page to database
     const result = await pageRepo.savePage({
         user_id: user.id,
         facebook_page_id: fbPage.id,
         page_name: fbPage.name,
-        access_token: accessToken,
+        access_token: accessToken.trim(),
         followers_count: fbPage.followers_count || 0,
         fans_count: fbPage.fan_count || 0,
     });
 
     if (!result.success) {
-        throw new Error(`Error al guardar la página: ${result.error}`);
+        throw new Error(`Error al guardar la página en la base de datos: ${result.error}`);
     }
 
     if (result.data) {
-        // 3. Record initial stats
+        // 4. Record initial stats snapshot
         await statsRepo.recordStats({
             page_id: result.data.id,
             followers_count: fbPage.followers_count || 0,

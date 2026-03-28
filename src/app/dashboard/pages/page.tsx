@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { createClient } from '@/lib/supabase/server';
 import { PageRepository } from '@/repositories/page.repository';
 import { PagesContent } from './PagesContent';
@@ -12,5 +13,13 @@ export default async function PagesPage() {
   const repo = new PageRepository();
   const pages = await repo.getUserPages(user.id);
 
-  return <PagesContent pages={pages} />;
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-neutral-900 dark:border-neutral-100" />
+      </div>
+    }>
+      <PagesContent pages={pages} />
+    </Suspense>
+  );
 }
