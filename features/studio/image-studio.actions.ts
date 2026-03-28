@@ -16,16 +16,14 @@ export async function generateImageAction(prompt: string, aspectRatio: string = 
     };
     const { width, height } = dimensions[aspectRatio] || dimensions["1:1"];
     const encodedPrompt = encodeURIComponent(prompt);
-    
-    // Using a cleaner URL and no-cache seed
-    const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${width}&height=${height}&nologo=true&seed=${Date.now()}`;
+    // Ultra-minimal URL to isolate the 400 error
+    const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}`;
+
+    console.log('FETCHING_URL:', imageUrl);
 
     const imageResponse = await fetch(imageUrl, {
       method: 'GET',
-      headers: {
-        'Accept': 'image/*'
-      },
-      cache: 'no-store'
+      headers: { 'Accept': 'image/jpeg' }
     });
 
     if (!imageResponse.ok) {
