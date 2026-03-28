@@ -3,7 +3,7 @@
 import { useTranslation } from '@/src/lib/i18n/LanguageContext';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
-import { BarChart3, Users, Zap, CalendarClock, AlertTriangle } from 'lucide-react';
+import { BarChart3, Users, Zap, CalendarClock, AlertTriangle, TrendingUp, Sparkles, Activity } from 'lucide-react';
 import { AiGenerator } from '@/features/ai/components/AiGenerator';
 import Link from 'next/link';
 
@@ -39,7 +39,6 @@ function formatNumber(n: number): string {
 }
 
 export function DashboardContent({
-  userEmail,
   userName,
   recentIdeas,
   pages,
@@ -50,145 +49,175 @@ export function DashboardContent({
   const statCards = [
     {
       title: t('dashboard.stats.posts'),
-      value: stats.totalPublishedPosts > 0 ? formatNumber(stats.totalPublishedPosts) : '—',
+      value: stats.totalPublishedPosts > 0 ? formatNumber(stats.totalPublishedPosts) : '0',
       sub: stats.totalPublishedPosts > 0
         ? `${stats.totalPublishedPosts} publicado${stats.totalPublishedPosts > 1 ? 's' : ''}`
-        : 'Sin posts aún',
+        : 'Sin actividad',
       icon: Zap,
-      color: 'text-blue-500',
+      gradient: 'from-blue-600/20 to-transparent',
+      borderColor: 'border-blue-500/20',
+      iconColor: 'text-blue-500',
     },
     {
       title: 'Alcance Total',
-      value: stats.totalReach > 0 ? formatNumber(stats.totalReach) : '—',
+      value: stats.totalReach > 0 ? formatNumber(stats.totalReach) : '0',
       sub: stats.trends.reachTrend !== 0 ? `${stats.trends.reachTrend > 0 ? '+' : ''}${stats.trends.reachTrend}% vs semana anterior` : 'Tendencia estable',
       trend: stats.trends.reachTrend,
-      icon: Users,
-      color: 'text-green-500',
+      icon: TrendingUp,
+      gradient: 'from-emerald-600/20 to-transparent',
+      borderColor: 'border-emerald-500/20',
+      iconColor: 'text-emerald-500',
     },
     {
-      title: 'Enganche Total',
-      value: stats.totalEngagement > 0 ? formatNumber(stats.totalEngagement) : '—',
-      sub: stats.trends.engagementTrend !== 0 ? `${stats.trends.engagementTrend > 0 ? '+' : ''}${stats.trends.engagementTrend}% engagement` : 'Interacción estable',
+      title: 'Engagement',
+      value: stats.totalEngagement > 0 ? formatNumber(stats.totalEngagement) : '0',
+      sub: stats.trends.engagementTrend !== 0 ? `${stats.trends.engagementTrend > 0 ? '+' : ''}${stats.trends.engagementTrend}% engagement` : 'Interacción constante',
       trend: stats.trends.engagementTrend,
-      icon: BarChart3,
-      color: 'text-pink-500',
+      icon: Activity,
+      gradient: 'from-purple-600/20 to-transparent',
+      borderColor: 'border-purple-500/20',
+      iconColor: 'text-purple-500',
     },
     {
-      title: t('dashboard.stats.scheduled'),
+      title: 'Programados',
       value: String(stats.pendingPosts),
       sub:
         stats.pendingPosts > 0
-          ? `${stats.pendingPosts} post${stats.pendingPosts > 1 ? 's' : ''} por publicar`
-          : 'Sin posts programados',
+          ? `${stats.pendingPosts} en cola de espera`
+          : 'Cola vacía',
       icon: CalendarClock,
-      color: 'text-amber-500',
+      gradient: 'from-orange-600/20 to-transparent',
+      borderColor: 'border-orange-500/20',
+      iconColor: 'text-orange-500',
     },
   ];
 
   return (
-    <div className="mx-auto max-w-7xl space-y-8">
-      {/* Header */}
-      <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-900 dark:text-neutral-50 text-balance">
-            {t('dashboard.welcome')}, {userName || userEmail.split('@')[0] || 'User'}
+    <div className="mx-auto max-w-7xl space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      {/* Hero Welcome Section */}
+      <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-neutral-900 to-black p-8 sm:p-12 border border-white/5 shadow-2xl">
+        <div className="relative z-10 space-y-4 max-w-2xl">
+          <Badge className="bg-blue-500/10 text-blue-400 border-blue-500/20 px-3 py-1 text-[10px] uppercase tracking-widest font-bold">
+            Elite Command Center
+          </Badge>
+          <h1 className="text-4xl sm:text-5xl font-black tracking-tighter text-white">
+            {t('dashboard.welcome')}, <span className="bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">{userName || 'Creador'}</span>
           </h1>
-          <p className="mt-1 text-sm sm:text-base text-neutral-500 dark:text-neutral-400">
-            {t('dashboard.subtitle')}
+          <p className="text-neutral-400 text-lg font-medium leading-relaxed">
+            {t('dashboard.subtitle')} Gestiona tu imperio digital con inteligencia artificial de última generación.
           </p>
         </div>
+        
+        {/* Decorative elements */}
+        <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-blue-600/10 blur-[100px]" />
+        <div className="absolute right-0 bottom-0 h-40 w-80 translate-y-1/2 rounded-full bg-purple-600/10 blur-[100px]" />
+        <Zap className="absolute right-12 top-12 w-32 h-32 text-white/5 -rotate-12" />
       </div>
 
       {/* Alert if no pages connected */}
       {stats.pageCount === 0 && (
-        <div className="flex items-center gap-3 rounded-xl border border-amber-200 bg-amber-50 dark:bg-amber-900/10 dark:border-amber-800 px-4 py-3 text-sm text-amber-700 dark:text-amber-400">
-          <AlertTriangle className="h-4 w-4 flex-shrink-0" />
-          <span>
-            No tienes páginas de Facebook conectadas.{' '}
-            <Link href="/dashboard/pages" className="font-semibold underline underline-offset-2 hover:opacity-80">
-              Conecta una página
-            </Link>{' '}
-            para ver tus métricas reales.
-          </span>
+        <div className="flex items-center gap-4 rounded-2xl border border-amber-500/20 bg-amber-500/5 px-6 py-4 text-sm text-amber-400 backdrop-blur-md">
+          <AlertTriangle className="h-5 w-5 flex-shrink-0" />
+          <p className="font-medium">
+            Tu cuenta no tiene páginas de Facebook vinculadas aún.{' '}
+            <Link href="/dashboard/pages" className="font-bold underline underline-offset-4 hover:text-amber-300 transition-colors">
+              Conectar mi primera página ahora
+            </Link>
+          </p>
         </div>
       )}
 
-      {/* Stats grid */}
-      <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+      {/* Stats grid with Glassmorphism */}
+      <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         {statCards.map((stat: any, i) => (
-          <Card key={i} className="p-0 border-neutral-200 dark:border-white/5 overflow-hidden transition-all hover:shadow-md group">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-4 px-4">
-              <CardTitle className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-widest">
+          <Card key={i} className={`relative p-0 bg-neutral-950/40 backdrop-blur-xl border ${stat.borderColor} overflow-hidden transition-all hover:scale-[1.02] hover:shadow-2xl group`}>
+            <div className={`absolute inset-0 bg-gradient-to-br ${stat.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
+            
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pt-6 px-6 relative z-10">
+              <CardTitle className="text-[10px] font-bold text-neutral-500 uppercase tracking-[0.2em]">
                 {stat.title}
               </CardTitle>
-              <stat.icon className={`h-4 w-4 ${stat.color} group-hover:scale-125 transition-transform`} />
+              <stat.icon className={`h-5 w-5 ${stat.iconColor} transition-transform duration-500 group-hover:rotate-12`} />
             </CardHeader>
-            <CardContent className="px-4 pb-4">
-              <div className="flex items-end gap-2">
-                <div className="text-2xl sm:text-3xl font-black dark:text-neutral-50">{stat.value}</div>
+            
+            <CardContent className="px-6 pb-6 relative z-10">
+              <div className="flex items-center gap-3">
+                <div className="text-3xl font-black text-white tracking-tighter">{stat.value}</div>
                 {stat.trend !== undefined && stat.trend !== 0 && (
-                  <div className={`mb-1 px-1.5 py-0.5 rounded text-[10px] font-bold ${stat.trend > 0 ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'}`}>
+                  <Badge variant="outline" className={`border-none px-2 py-0.5 text-[10px] font-black ${stat.trend > 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>
                     {stat.trend > 0 ? '↑' : '↓'}{Math.abs(stat.trend)}%
-                  </div>
+                  </Badge>
                 )}
               </div>
-              <p className="text-[10px] font-medium text-neutral-500 dark:text-neutral-500 mt-1">{stat.sub}</p>
+              <p className="text-[11px] font-semibold text-neutral-600 mt-2 flex items-center gap-1.5">
+                <span className={`w-1.5 h-1.5 rounded-full ${stat.iconColor} opacity-50`} />
+                {stat.sub}
+              </p>
             </CardContent>
-            {stat.trend !== undefined && (
-               <div className={`h-0.5 w-full ${stat.trend > 0 ? 'bg-green-500' : 'bg-red-500'} opacity-30`} />
-            )}
           </Card>
         ))}
       </div>
 
-      {/* Main content area */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2">
-          <Card className="h-full">
-            <CardHeader className="px-4 sm:px-6">
-              <CardTitle>{t('dashboard.recent.title')}</CardTitle>
-              <CardDescription>{t('dashboard.recent.description')}</CardDescription>
+      {/* Secondary area: Content & Ideas */}
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+        {/* Recent Ideas / Feed */}
+        <div className="lg:col-span-2 space-y-6">
+          <Card className="bg-neutral-950 border-white/5 overflow-hidden shadow-xl">
+            <CardHeader className="px-8 pt-8 pb-4 flex flex-row items-center justify-between">
+              <div>
+                <CardTitle className="text-xl font-bold text-white flex items-center gap-2">
+                  <Sparkles className="h-5 w-5 text-blue-500" /> {t('dashboard.recent.title')}
+                </CardTitle>
+                <CardDescription className="text-neutral-500 mt-1">{t('dashboard.recent.description')}</CardDescription>
+              </div>
             </CardHeader>
             <CardContent className="px-0">
-              <div className="divide-y divide-neutral-200 dark:divide-neutral-800">
+              <div className="divide-y divide-white/5">
                 {recentIdeas.map((idea) => (
                   <div
                     key={idea.id}
-                    className="p-6 transition-colors hover:bg-neutral-50/50 dark:hover:bg-neutral-900/50"
+                    className="p-8 transition-all hover:bg-white/[0.02] group"
                   >
-                    <div className="mb-3 flex items-center justify-between">
+                    <div className="mb-4 flex items-center justify-between">
                       <Badge
                         variant="secondary"
-                        className="text-blue-600 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400"
+                        className="bg-neutral-900 text-neutral-400 group-hover:bg-blue-500/10 group-hover:text-blue-400 transition-colors px-3 py-1"
                       >
                         {idea.idea}
                       </Badge>
-                      <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-6">
                         <Link 
                           href={`/dashboard/schedule?content=${encodeURIComponent(idea.source)}`}
-                          className="flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+                          className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-neutral-500 hover:text-blue-400 transition-colors"
                         >
-                          <CalendarClock className="h-3.5 w-3.5" />
+                          <CalendarClock className="h-4 w-4" />
                           <span>Programar</span>
                         </Link>
-                        <span className="text-xs text-neutral-500">{t('dashboard.recent.just_now')}</span>
+                        <span className="text-[10px] text-neutral-600 font-medium uppercase tracking-widest">{t('dashboard.recent.just_now')}</span>
                       </div>
                     </div>
-                    <p className="text-sm text-neutral-800 dark:text-neutral-300 line-clamp-2">
+                    <p className="text-neutral-300 leading-relaxed font-medium line-clamp-3 group-hover:text-white transition-colors">
                       {idea.source}
                     </p>
                   </div>
                 ))}
                 {!recentIdeas.length && (
-                  <div className="py-12 text-center text-sm text-neutral-500">
-                    {t('dashboard.recent.no_items')}
+                  <div className="py-20 text-center space-y-4">
+                    <div className="inline-flex p-4 rounded-3xl bg-neutral-900 text-neutral-600">
+                      <Zap className="h-8 w-8" />
+                    </div>
+                    <p className="text-neutral-500 font-medium tracking-tight">
+                      No hay actividad reciente para mostrar.
+                    </p>
                   </div>
                 )}
               </div>
             </CardContent>
           </Card>
         </div>
-        <div className="lg:col-span-1">
+
+        {/* Sidebar Mini-Tools */}
+        <div className="lg:col-span-1 space-y-8">
           <AiGenerator pages={pages} />
         </div>
       </div>
